@@ -12,21 +12,27 @@ import {
     AlertCircle,
     Loader2,
     UserPlus,
-    Users
+    Users,
+    FileSpreadsheet,
+    Eye
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import {
     getConceptosPago,
     updateConceptoMonto,
     getCursos,
     createCurso,
-    deleteCurso
+    deleteCurso,
+    getAlumnosByCurso
 } from '@/lib/actions/admin.actions';
 import { getNivelesAction } from '@/lib/actions/catalogo.actions';
 import { cn } from '@/lib/utils';
 import AsignarAlumnosModal from '@/components/admin/AsignarAlumnosModal';
+import CursoAlumnosModal from '@/components/admin/CursoAlumnosModal';
 
 export default function ConfigPage() {
     const [conceptos, setConceptos] = useState<any[]>([]);
@@ -42,6 +48,7 @@ export default function ConfigPage() {
     // Modal state
     const [selectedCurso, setSelectedCurso] = useState<any | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
     useEffect(() => {
         const loadData = async () => {
@@ -97,6 +104,68 @@ export default function ConfigPage() {
         const res = await deleteCurso(id);
         if (res.success) {
             setCursos(cursos.filter(c => c.id !== id));
+        }
+    };
+
+    const handleExportAlumnos = async (curso: any) => {
+        try {
+            const res = await getAlumnosByCurso(curso.id);
+            if (!res.data || res.data.length === 0) {
+                alert('No hay alumnos inscriptos en este curso.');
+                return;
+            }
+
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Alumnos');
+
+            worksheet.columns = [
+                { header: 'APELLIDO', key: 'apellido', width: 20 },
+                { header: 'NOMBRE', key: 'nombre', width: 20 },
+                { header: 'DNI', key: 'dni', width: 15 },
+                { header: 'FECHA NAC.', key: 'fecha_nacimiento', width: 15 },
+                { header: 'GÉNERO', key: 'genero', width: 10 },
+                { header: 'DOMICILIO', key: 'domicilio', width: 30 },
+                { header: 'LOCALIDAD', key: 'localidad', width: 20 },
+                { header: 'GRUPO SANGUÍNEO', key: 'gs', width: 15 },
+                { header: 'ALERGIAS', key: 'alergias', width: 20 },
+                { header: 'TUTOR 1', key: 'tutor1', width: 25 },
+                { header: 'TELÉFONO 1', key: 'tel1', width: 15 },
+                { header: 'TUTOR 2', key: 'tutor2', width: 25 },
+                { header: 'TELÉFONO 2', key: 'tel2', width: 15 },
+                { header: 'REPITE', key: 'repite', width: 10 },
+                { header: 'FECHA INS.', key: 'fecha', width: 15 }
+            ];
+
+            res.data.forEach((ins: any) => {
+                const t1 = ins.inscripciones_tutores?.[0]?.tutor;
+                const t2 = ins.inscripciones_tutores?.[1]?.tutor;
+
+                worksheet.addRow({
+                    apellido: ins.alumno?.apellido,
+                    nombre: ins.alumno?.nombre,
+                    dni: ins.alumno?.dni,
+                    fecha_nacimiento: ins.alumno?.fecha_nacimiento,
+                    genero: ins.alumno?.genero,
+                    domicilio: `${ins.domicilio?.calle} ${ins.domicilio?.numero}`,
+                    localidad: ins.domicilio?.localidad?.nombre,
+                    gs: ins.ficha_salud?.grupo_sanguineo,
+                    alergias: ins.ficha_salud?.alergias,
+                    tutor1: t1 ? `${t1.apellido}, ${t1.nombre}` : '',
+                    tel1: t1?.telefono,
+                    tutor2: t2 ? `${t2.apellido}, ${t2.nombre}` : '',
+                    tel2: t2?.telefono,
+                    repite: ins.repite ? 'SI' : 'NO',
+                    fecha: ins.created_at ? new Date(ins.created_at).toLocaleDateString() : ''
+                });
+            });
+
+            worksheet.getRow(1).font = { bold: true };
+            const buffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], { type: 'application/octet-stream' });
+            saveAs(blob, `Lista_${curso.nombre}.xlsx`);
+        } catch (error) {
+            console.error('Export error:', error);
+            alert('Error al exportar alumnos.');
         }
     };
 
@@ -237,12 +306,33 @@ export default function ConfigPage() {
                                     <div className="flex items-center gap-1 opacity-0 group-hover/item:opacity-100 transition-opacity">
                                         <Button
                                             variant="ghost"
+                                            size="icon"
+                                            title="Ver Alumnos"
+                                            onClick={() => {
+                                                setSelectedCurso(curso);
+                                                setIsViewModalOpen(true);
+                                            }}
+                                            className="text-primary-400 hover:text-primary-600 h-9 w-9 rounded-lg"
+                                        >
+                                            <Eye className="w-4 h-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            title="Exportar Alumnos (Excel)"
+                                            onClick={() => handleExportAlumnos(curso)}
+                                            className="text-emerald-600 hover:bg-emerald-50 h-9 w-9 rounded-lg"
+                                        >
+                                            <FileSpreadsheet className="w-4 h-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
                                             size="sm"
                                             onClick={() => {
                                                 setSelectedCurso(curso);
                                                 setIsModalOpen(true);
                                             }}
-                                            className="text-emerald-600 hover:bg-emerald-50 gap-2 h-9 px-3 rounded-lg"
+                                            className="text-primary-600 hover:bg-primary-50 gap-2 h-9 px-3 rounded-lg"
                                         >
                                             <UserPlus className="w-4 h-4" />
                                             <span className="text-[10px] font-bold uppercase">Asignar</span>
@@ -272,6 +362,11 @@ export default function ConfigPage() {
                     const cuRes = await getCursos();
                     if (cuRes.data) setCursos(cuRes.data);
                 }}
+            />
+            <CursoAlumnosModal
+                isOpen={isViewModalOpen}
+                onClose={() => setIsViewModalOpen(false)}
+                curso={selectedCurso}
             />
         </div>
     );

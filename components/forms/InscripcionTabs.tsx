@@ -74,7 +74,7 @@ export default function InscripcionTabs() {
     return (
         <div className="w-full max-w-4xl mx-auto py-18">
             <div className="mb-12">
-                <h1 className="font-display text-display text-primary-900 mb-4">
+                <h1 className="font-display text-display text-primary-900 text-4xl mb-4">
                     Formulario de Inscripción
                 </h1>
                 <p className="text-lg text-neutral-800">

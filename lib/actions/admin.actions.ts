@@ -50,12 +50,14 @@ export async function getInscripcionesAdmin(params: {
 export async function updateInscripcionStatus(id: string, estado: 'aprobada' | 'rechazada', motivo?: string) {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
+    const { data: { user } } = await supabase.auth.getUser();
 
     const { error } = await supabase
         .from('inscripciones')
         .update({
             estado,
             motivo_rechazo: motivo || null,
+            audit_user_id: user?.id,
             updated_at: new Date().toISOString()
         })
         .eq('id', id);
@@ -186,6 +188,8 @@ export async function registrarPago(params: {
         .eq('concepto_pago_id', params.conceptoId)
         .single();
 
+    const { data: { user } } = await supabase.auth.getUser();
+
     let error;
     if (existing) {
         const { error: updateError } = await supabase
@@ -194,7 +198,8 @@ export async function registrarPago(params: {
                 monto: params.monto,
                 pagado: true,
                 fecha_pago: params.fechaPago || new Date().toISOString(),
-                observaciones: params.observaciones
+                observaciones: params.observaciones,
+                user_id: user?.id
             })
             .eq('id', existing.id);
         error = updateError;
@@ -207,7 +212,8 @@ export async function registrarPago(params: {
                 monto: params.monto,
                 pagado: true,
                 fecha_pago: params.fechaPago || new Date().toISOString(),
-                observaciones: params.observaciones
+                observaciones: params.observaciones,
+                user_id: user?.id
             });
         error = insertError;
     }
@@ -296,10 +302,14 @@ export async function getAlumnosSinCurso(nivelCodigo: string) {
 export async function asignarCursoMasivo(inscripcionIds: string[], cursoId: string) {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
+    const { data: { user } } = await supabase.auth.getUser();
 
     const { error } = await supabase
         .from('inscripciones')
-        .update({ curso_id: cursoId })
+        .update({
+            curso_id: cursoId,
+            audit_user_id: user?.id
+        })
         .in('id', inscripcionIds);
 
     if (error) return { error: error.message };
@@ -366,4 +376,31 @@ export async function getReporteSeguros(cursoId?: string) {
     });
 
     return { data: reporte };
+}
+
+export async function getAlumnosByCurso(cursoId: string) {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    const { data, error } = await supabase
+        .from('inscripciones')
+        .select(`
+            id,
+            created_at,
+            nivel_codigo,
+            repite,
+            alumno:alumnos(*),
+            domicilio:domicilios(*, localidad:localidades(nombre)),
+            ficha_salud:fichas_salud(*),
+            inscripciones_tutores(
+                vinculo,
+                tutor:tutores(*)
+            )
+        `)
+        .eq('curso_id', cursoId)
+        .eq('estado', 'aprobada')
+        .order('created_at', { ascending: false });
+
+    if (error) return { error: error.message };
+    return { data };
 }

@@ -18,7 +18,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { getReporteSeguros, getCursos } from '@/lib/actions/admin.actions';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import { cn } from '@/lib/utils';
 
 export default function ReportesPage() {
@@ -45,20 +46,41 @@ export default function ReportesPage() {
         setLoading(false);
     };
 
-    const exportToExcel = () => {
-        const dataToExport = filteredReporte.map(item => ({
-            'Apellido': item.alumno.apellido,
-            'Nombre': item.alumno.nombre,
-            'DNI': item.alumno.dni,
-            'Curso': item.curso?.nombre || 'S/A',
-            'Estado Seguro': item.pagado ? 'PAGADO' : 'DEBE',
-            'Monto': item.monto
-        }));
+    const exportToExcel = async () => {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Seguros');
 
-        const ws = XLSX.utils.json_to_sheet(dataToExport);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Seguros");
-        XLSX.writeFile(wb, `Reporte_Seguros_${new Date().toISOString().split('T')[0]}.xlsx`);
+        worksheet.columns = [
+            { header: 'Apellido', key: 'apellido', width: 20 },
+            { header: 'Nombre', key: 'nombre', width: 20 },
+            { header: 'DNI', key: 'dni', width: 15 },
+            { header: 'Curso', key: 'curso', width: 20 },
+            { header: 'Estado Seguro', key: 'estado', width: 15 },
+            { header: 'Monto', key: 'monto', width: 10 },
+        ];
+
+        filteredReporte.forEach(item => {
+            worksheet.addRow({
+                apellido: item.alumno.apellido,
+                nombre: item.alumno.nombre,
+                dni: item.alumno.dni,
+                curso: item.curso?.nombre || 'S/A',
+                estado: item.pagado ? 'PAGADO' : 'DEBE',
+                monto: item.monto
+            });
+        });
+
+        // Estilos básicos para el encabezado
+        worksheet.getRow(1).font = { bold: true };
+        worksheet.getRow(1).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFE0E0E0' }
+        };
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        saveAs(blob, `Reporte_Seguros_${new Date().toISOString().split('T')[0]}.xlsx`);
     };
 
     const filteredReporte = reporte.filter(item => {
