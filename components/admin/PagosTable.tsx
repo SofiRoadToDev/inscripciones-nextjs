@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, Filter, CreditCard, CheckCircle2, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Filter, CreditCard, CheckCircle2, XCircle, ChevronLeft, ChevronRight, FileText, Receipt } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,9 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import RegistrarPagoModal from './RegistrarPagoModal';
+import { useRef } from 'react';
+import FichaInscripcion from './FichaInscripcion';
+import ComprobantePago from './ComprobantePago';
 
 export default function PagosTable() {
     const [data, setData] = useState<any[]>([]);
@@ -23,6 +26,11 @@ export default function PagosTable() {
     // Modal State
     const [selectedInscripcion, setSelectedInscripcion] = useState<any | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Refs for printing
+    const fichaRef = useRef<HTMLDivElement>(null);
+    const reciboRef = useRef<HTMLDivElement>(null);
+    const [printData, setPrintData] = useState<any>(null);
 
     const fetchData = async () => {
         setLoading(true);
@@ -43,14 +51,44 @@ export default function PagosTable() {
         fetchData();
     }, [search, nivel, page]);
 
+    const handlePrint = (type: 'ficha' | 'recibo', item: any) => {
+        setPrintData(item);
+
+        // Timeout to ensure state update and ref availability
+        setTimeout(() => {
+            const ref = type === 'ficha' ? fichaRef : reciboRef;
+            const printContent = ref.current;
+            if (!printContent) return;
+
+            const windowPrint = window.open('', '', 'left=0,top=0,width=800,height=900');
+            if (!windowPrint) return;
+
+            windowPrint.document.write('<html><head><title>Imprimir</title>');
+            windowPrint.document.write('<script src="https://cdn.tailwindcss.com"></script>');
+            windowPrint.document.write('</head><body>');
+            windowPrint.document.write(printContent.innerHTML);
+            windowPrint.document.write('</body></html>');
+            windowPrint.document.close();
+
+            setTimeout(() => {
+                windowPrint.focus();
+                windowPrint.print();
+                windowPrint.close();
+            }, 500);
+        }, 100);
+    };
+
     const getPaymentStatus = (inscripcion: any, tipo: 'matricula' | 'seguro') => {
         const pagos = inscripcion.pagos || [];
         if (tipo === 'matricula') {
-            const p = pagos.find((p: any) => p.concepto.nombre.toLowerCase().includes('matrícula'));
-            return p ? { pagado: p.pagado, monto: p.monto, nombre: p.concepto.nombre } : null;
+            const p = pagos.find((p: any) =>
+                p.concepto.nombre.toLowerCase().includes('matrícula') ||
+                p.concepto.nombre.toLowerCase().includes('matricula')
+            );
+            return p ? { pagado: p.pagado, monto: p.monto, nombre: p.concepto.nombre, fecha: p.fecha_pago, obs: p.observaciones } : null;
         } else {
             const p = pagos.find((p: any) => p.concepto.nombre.toLowerCase().includes('seguro'));
-            return p ? { pagado: p.pagado, monto: p.monto, nombre: p.concepto.nombre } : null;
+            return p ? { pagado: p.pagado, monto: p.monto, nombre: p.concepto.nombre, fecha: p.fecha_pago, obs: p.observaciones } : null;
         }
     };
 
@@ -103,6 +141,7 @@ export default function PagosTable() {
                                 data.map((item) => {
                                     const matricula = getPaymentStatus(item, 'matricula');
                                     const seguro = getPaymentStatus(item, 'seguro');
+                                    const tienePagos = (matricula?.pagado || seguro?.pagado);
 
                                     return (
                                         <tr key={item.id} className="hover:bg-primary-50/30 transition-colors">
@@ -128,18 +167,42 @@ export default function PagosTable() {
                                                 )}
                                             </td>
                                             <td className="px-6 py-5 text-right">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="text-primary-600 hover:bg-primary-50 gap-2"
-                                                    onClick={() => {
-                                                        setSelectedInscripcion(item);
-                                                        setIsModalOpen(true);
-                                                    }}
-                                                >
-                                                    <CreditCard className="w-4 h-4" />
-                                                    Cobrar
-                                                </Button>
+                                                <div className="flex justify-end gap-1">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        title="Ver Ficha"
+                                                        className="h-8 w-8 text-primary-400 hover:text-primary-600"
+                                                        onClick={() => handlePrint('ficha', item)}
+                                                    >
+                                                        <FileText className="w-4 h-4" />
+                                                    </Button>
+
+                                                    {tienePagos && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            title="Imprimir Recibo"
+                                                            className="h-8 w-8 text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50"
+                                                            onClick={() => handlePrint('recibo', item)}
+                                                        >
+                                                            <Receipt className="w-4 h-4" />
+                                                        </Button>
+                                                    )}
+
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-8 text-primary-600 hover:bg-primary-50 gap-2 px-3"
+                                                        onClick={() => {
+                                                            setSelectedInscripcion(item);
+                                                            setIsModalOpen(true);
+                                                        }}
+                                                    >
+                                                        <CreditCard className="w-4 h-4" />
+                                                        Cobrar
+                                                    </Button>
+                                                </div>
                                             </td>
                                         </tr>
                                     );
@@ -172,6 +235,37 @@ export default function PagosTable() {
                 conceptos={conceptos}
                 onSuccess={fetchData}
             />
+
+            {/* Hidden printable components */}
+            <div className="hidden">
+                {printData && (
+                    <>
+                        <div ref={fichaRef}>
+                            <FichaInscripcion data={printData} />
+                        </div>
+                        <div ref={reciboRef}>
+                            {(() => {
+                                const matricula = getPaymentStatus(printData, 'matricula');
+                                const seguro = getPaymentStatus(printData, 'seguro');
+                                const pagoFinal = seguro?.pagado ? seguro : (matricula?.pagado ? matricula : null);
+
+                                return pagoFinal ? (
+                                    <ComprobantePago
+                                        alumno={printData.alumno}
+                                        curso={printData.curso?.nombre}
+                                        pago={{
+                                            concepto: pagoFinal.nombre,
+                                            monto: pagoFinal.monto,
+                                            fecha: pagoFinal.fecha,
+                                            observaciones: pagoFinal.obs
+                                        }}
+                                    />
+                                ) : null;
+                            })()}
+                        </div>
+                    </>
+                )}
+            </div>
         </div>
     );
 }

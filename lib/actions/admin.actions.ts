@@ -130,13 +130,21 @@ export async function getPagosAdmin(params: { search?: string; nivel?: string; p
             id,
             created_at,
             nivel_codigo,
-            alumno:alumnos(id, nombre, apellido, dni),
+            repite,
+            alumno:alumnos(*),
             curso:cursos(id, nombre),
+            domicilio:domicilios(*, provincia:provincias(nombre), localidad:localidades(nombre)),
+            ficha_salud:fichas_salud(*),
+            inscripciones_tutores(
+                vinculo,
+                tutor:tutores(*)
+            ),
             pagos:pagos_inscripcion(
                 id,
                 monto,
                 pagado,
                 fecha_pago,
+                observaciones,
                 concepto:conceptos_pago(id, nombre)
             )
         `, { count: 'exact' });
@@ -166,6 +174,7 @@ export async function registrarPago(params: {
     conceptoId: string;
     monto: number;
     fechaPago?: string;
+    observaciones?: string;
 }) {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
@@ -184,7 +193,8 @@ export async function registrarPago(params: {
             .update({
                 monto: params.monto,
                 pagado: true,
-                fecha_pago: params.fechaPago || new Date().toISOString()
+                fecha_pago: params.fechaPago || new Date().toISOString(),
+                observaciones: params.observaciones
             })
             .eq('id', existing.id);
         error = updateError;
@@ -196,7 +206,8 @@ export async function registrarPago(params: {
                 concepto_pago_id: params.conceptoId,
                 monto: params.monto,
                 pagado: true,
-                fecha_pago: params.fechaPago || new Date().toISOString()
+                fecha_pago: params.fechaPago || new Date().toISOString(),
+                observaciones: params.observaciones
             });
         error = insertError;
     }

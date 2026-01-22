@@ -10,7 +10,10 @@ import {
     UserCircle2,
     BookOpen,
     Loader2,
-    AlertCircle
+    AlertCircle,
+    Printer,
+    FileText,
+    Receipt
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +21,9 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useRef } from 'react';
+import FichaInscripcion from './FichaInscripcion';
+import ComprobantePago from './ComprobantePago';
 
 interface Props {
     isOpen: boolean;
@@ -30,6 +36,9 @@ export default function InscripcionDetalleModal({ isOpen, onClose, data, onUpdat
     const [showRejectReason, setShowRejectReason] = useState(false);
     const [reason, setReason] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const fichaRef = useRef<HTMLDivElement>(null);
+    const reciboRef = useRef<HTMLDivElement>(null);
 
     if (!isOpen || !data) return null;
 
@@ -53,6 +62,32 @@ export default function InscripcionDetalleModal({ isOpen, onClose, data, onUpdat
         setReason('');
         onClose();
     };
+
+    const handlePrint = (ref: React.RefObject<HTMLDivElement | null>) => {
+        const printContent = ref.current;
+        if (!printContent) return;
+
+        const windowPrint = window.open('', '', 'left=0,top=0,width=800,height=900,toolbar=0,scrollbars=0,status=0');
+        if (!windowPrint) return;
+
+        windowPrint.document.write('<html><head><title>Imprimir</title>');
+        windowPrint.document.write('<script src="https://cdn.tailwindcss.com"></script>');
+        windowPrint.document.write('</head><body>');
+        windowPrint.document.write(printContent.innerHTML);
+        windowPrint.document.write('</body></html>');
+        windowPrint.document.close();
+
+        setTimeout(() => {
+            windowPrint.focus();
+            windowPrint.print();
+            windowPrint.close();
+        }, 500);
+    };
+
+    // Buscar pago de seguro si existe
+    const pagoSeguro = data.pagos?.find((p: any) =>
+        p.concepto.nombre.toLowerCase().includes('seguro') && p.pagado
+    );
 
     return (
         <div className="fixed inset-0 z-[100] flex justify-end">
@@ -78,9 +113,32 @@ export default function InscripcionDetalleModal({ isOpen, onClose, data, onUpdat
                             </Badge>
                         </div>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full hover:bg-primary-50">
-                        <X className="w-5 h-5" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <div className="flex p-1 bg-primary-50 rounded-xl mr-2">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-9 gap-2 text-primary-600 hover:bg-white rounded-lg"
+                                onClick={() => handlePrint(fichaRef)}
+                            >
+                                <FileText className="w-4 h-4" />
+                                <span className="text-[10px] font-black uppercase">Ficha</span>
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-9 gap-2 text-emerald-600 hover:bg-white rounded-lg disabled:opacity-30"
+                                onClick={() => handlePrint(reciboRef)}
+                                disabled={!pagoSeguro}
+                            >
+                                <Receipt className="w-4 h-4" />
+                                <span className="text-[10px] font-black uppercase">Recibo</span>
+                            </Button>
+                        </div>
+                        <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full hover:bg-primary-50">
+                            <X className="w-5 h-5" />
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-8 space-y-10">
@@ -193,6 +251,27 @@ export default function InscripcionDetalleModal({ isOpen, onClose, data, onUpdat
                             )}
                         </div>
                     </section>
+
+                    {/* Printeable Components (Hidden) */}
+                    <div className="hidden">
+                        <div ref={fichaRef}>
+                            <FichaInscripcion data={data} />
+                        </div>
+                        {pagoSeguro && (
+                            <div ref={reciboRef}>
+                                <ComprobantePago
+                                    alumno={data.alumno}
+                                    curso={data.curso?.nombre}
+                                    pago={{
+                                        concepto: pagoSeguro.concepto.nombre,
+                                        monto: pagoSeguro.monto,
+                                        fecha: pagoSeguro.fecha_pago,
+                                        observaciones: pagoSeguro.observaciones
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Footer Actions */}
