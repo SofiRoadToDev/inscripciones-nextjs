@@ -234,14 +234,66 @@ export async function updateConceptoMonto(id: string, monto: number) {
     return { success: true };
 }
 
-export async function createCurso(nombre: string, nivelCodigo: string) {
+export async function createCurso(params: {
+    division: string;
+    nivelCodigo: string;
+    turno: 'Mañana' | 'Tarde'
+}) {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
+
+    // Generate technical name: [Anio][Division][NivelCod][Turno]
+    // Anio comes from nivelCodigo (taking the first digits)
+    const anio = params.nivelCodigo.match(/\d+/)?.[0] || '';
+    // Nivel partial (CB or CS)
+    const nivelCod = params.nivelCodigo.includes('Básico') ? 'CB' : 'CS';
+    const turnoCod = params.turno === 'Mañana' ? 'TM' : 'TT';
+
+    const nombreTecnico = `${anio}${params.division}${nivelCod}${turnoCod}`;
+
     const { error } = await supabase
         .from('cursos')
-        .insert({ nombre, nivel_codigo: nivelCodigo });
+        .insert({
+            nombre: nombreTecnico,
+            nivel_codigo: params.nivelCodigo,
+            turno: params.turno
+        });
 
     if (error) return { error: error.message };
+    revalidatePath('/admin/config');
+    return { success: true };
+}
+
+export async function getAlumnosSinCurso(nivelCodigo: string) {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    const { data, error } = await supabase
+        .from('inscripciones')
+        .select(`
+            id,
+            alumno:alumnos(id, nombre, apellido, dni, fecha_nacimiento, genero)
+        `)
+        .eq('nivel_codigo', nivelCodigo)
+        .eq('estado', 'aprobada')
+        .is('curso_id', null);
+
+    if (error) return { error: error.message };
+    return { data };
+}
+
+export async function asignarCursoMasivo(inscripcionIds: string[], cursoId: string) {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    const { error } = await supabase
+        .from('inscripciones')
+        .update({ curso_id: cursoId })
+        .in('id', inscripcionIds);
+
+    if (error) return { error: error.message };
+
+    revalidatePath('/admin');
     revalidatePath('/admin/config');
     return { success: true };
 }
@@ -257,4 +309,50 @@ export async function deleteCurso(id: string) {
     if (error) return { error: error.message };
     revalidatePath('/admin/config');
     return { success: true };
+}
+
+export async function getReporteSeguros(cursoId?: string) {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    let query = supabase
+        .from('inscripciones')
+        .select(`
+            id,
+            estado,
+            alumno:alumnos(id, nombre, apellido, dni),
+            curso:cursos(id, nombre),
+            pagos:pagos_inscripcion(
+                id,
+                pagado,
+                monto,
+                concepto:conceptos_pago(nombre)
+            )
+        `)
+        .eq('estado', 'aprobada');
+
+    if (cursoId && cursoId !== 'todos') {
+        query = query.eq('curso_id', cursoId);
+    }
+
+    const { data, error } = await query;
+
+    if (error) return { error: error.message };
+
+    // Process data to see who paid insurance (any concept containing "seguro")
+    const reporte = data.map((ins: any) => {
+        const pagoSeguro = ins.pagos?.find((p: any) =>
+            p.concepto.nombre.toLowerCase().includes('seguro') && p.pagado
+        );
+
+        return {
+            id: ins.id,
+            alumno: ins.alumno,
+            curso: ins.curso,
+            pagado: !!pagoSeguro,
+            monto: pagoSeguro?.monto || 0
+        };
+    });
+
+    return { data: reporte };
 }

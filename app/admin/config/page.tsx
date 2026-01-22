@@ -10,7 +10,9 @@ import {
     Save,
     CheckCircle2,
     AlertCircle,
-    Loader2
+    Loader2,
+    UserPlus,
+    Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +26,7 @@ import {
 } from '@/lib/actions/admin.actions';
 import { getNivelesAction } from '@/lib/actions/catalogo.actions';
 import { cn } from '@/lib/utils';
+import AsignarAlumnosModal from '@/components/admin/AsignarAlumnosModal';
 
 export default function ConfigPage() {
     const [conceptos, setConceptos] = useState<any[]>([]);
@@ -33,8 +36,12 @@ export default function ConfigPage() {
     const [savingId, setSavingId] = useState<string | null>(null);
 
     // Form states
-    const [nuevoCurso, setNuevoCurso] = useState({ nombre: '', nivel: '' });
+    const [nuevoCurso, setNuevoCurso] = useState({ division: '', nivel: '', turno: '' as any });
     const [isCreatingCurso, setIsCreatingCurso] = useState(false);
+
+    // Modal state
+    const [selectedCurso, setSelectedCurso] = useState<any | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         const loadData = async () => {
@@ -66,14 +73,21 @@ export default function ConfigPage() {
 
     const handleCreateCurso = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!nuevoCurso.nombre || !nuevoCurso.nivel) return;
+        if (!nuevoCurso.division || !nuevoCurso.nivel || !nuevoCurso.turno) return;
 
         setIsCreatingCurso(true);
-        const res = await createCurso(nuevoCurso.nombre, nuevoCurso.nivel);
+        const res = await createCurso({
+            division: nuevoCurso.division,
+            nivelCodigo: nuevoCurso.nivel,
+            turno: nuevoCurso.turno as 'Mañana' | 'Tarde'
+        });
+
         if (res.success) {
-            setNuevoCurso({ nombre: '', nivel: '' });
+            setNuevoCurso({ division: '', nivel: '', turno: '' as any });
             const cuRes = await getCursos();
             if (cuRes.data) setCursos(cuRes.data);
+        } else {
+            alert('Error: ' + res.error);
         }
         setIsCreatingCurso(false);
     };
@@ -163,16 +177,12 @@ export default function ConfigPage() {
 
                     <div className="bg-white border border-primary-100 rounded-[2rem] p-8 shadow-sm space-y-8">
                         {/* New Course Form */}
-                        <form onSubmit={handleCreateCurso} className="flex flex-col sm:flex-row gap-3">
-                            <Input
-                                placeholder="Nombre (Ej: 1er Año B)"
-                                value={nuevoCurso.nombre}
-                                onChange={(e) => setNuevoCurso({ ...nuevoCurso, nombre: e.target.value })}
-                                className="border-primary-100"
-                                required
-                            />
+                        <form onSubmit={handleCreateCurso} className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-primary-50/50 p-6 rounded-3xl border border-primary-100">
+                            <div className="space-y-1 sm:col-span-2">
+                                <label className="text-[10px] font-black uppercase text-primary-400 ml-1">Nuevo Curso Físico</label>
+                            </div>
                             <select
-                                className="bg-primary-50 border-none rounded-xl px-4 py-2 text-sm text-primary-900 focus:ring-2 focus:ring-primary-500 min-w-[120px]"
+                                className="bg-white border border-primary-100 rounded-xl px-4 py-3 text-sm text-primary-900 focus:ring-2 focus:ring-primary-500"
                                 value={nuevoCurso.nivel}
                                 onChange={(e) => setNuevoCurso({ ...nuevoCurso, nivel: e.target.value })}
                                 required
@@ -182,27 +192,70 @@ export default function ConfigPage() {
                                     <option key={n.codigo} value={n.codigo}>{n.codigo}</option>
                                 ))}
                             </select>
-                            <Button type="submit" className="bg-primary-900 hover:bg-primary-800 rounded-xl" disabled={isCreatingCurso}>
-                                {isCreatingCurso ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                            <select
+                                className="bg-white border border-primary-100 rounded-xl px-4 py-3 text-sm text-primary-900 focus:ring-2 focus:ring-primary-500"
+                                value={nuevoCurso.division}
+                                onChange={(e) => setNuevoCurso({ ...nuevoCurso, division: e.target.value })}
+                                required
+                            >
+                                <option value="">División...</option>
+                                <option value="1">1ra División</option>
+                                <option value="2">2da División</option>
+                                <option value="3">3ra División</option>
+                            </select>
+                            <select
+                                className="bg-white border border-primary-100 rounded-xl px-4 py-3 text-sm text-primary-900 focus:ring-2 focus:ring-primary-500"
+                                value={nuevoCurso.turno}
+                                onChange={(e) => setNuevoCurso({ ...nuevoCurso, turno: e.target.value })}
+                                required
+                            >
+                                <option value="">Turno...</option>
+                                <option value="Mañana">Mañana</option>
+                                <option value="Tarde">Tarde</option>
+                            </select>
+                            <Button type="submit" className="bg-primary-900 hover:bg-primary-800 rounded-xl h-full py-3" disabled={isCreatingCurso}>
+                                {isCreatingCurso ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Plus className="w-4 h-4 mr-2" /> Crear</>}
                             </Button>
                         </form>
 
                         {/* List */}
-                        <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+                        <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
                             {cursos.map(curso => (
-                                <div key={curso.id} className="flex items-center justify-between p-4 bg-neutral-50 rounded-2xl border border-transparent hover:border-primary-100 transition-all hover:bg-white group">
-                                    <div className="flex items-center gap-3">
-                                        <Badge className="bg-primary-100 text-primary-700 hover:bg-primary-200 border-none">{curso.nivel_codigo}</Badge>
-                                        <span className="font-semibold text-primary-900">{curso.nombre}</span>
+                                <div key={curso.id} className="flex items-center justify-between p-4 bg-neutral-50 rounded-2xl border border-transparent hover:border-primary-100 transition-all hover:bg-white group/item shadow-sm hover:shadow-md">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center text-primary-600 font-bold font-mono text-xs">
+                                            {curso.nombre}
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-bold text-primary-900">{curso.nombre}</span>
+                                                <Badge variant="outline" className="bg-primary-50 text-primary-500 text-[9px] uppercase font-black border-none">{curso.turno}</Badge>
+                                            </div>
+                                            <p className="text-[10px] text-primary-400 font-bold uppercase tracking-tighter">{curso.nivel_codigo}</p>
+                                        </div>
                                     </div>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => handleDeleteCurso(curso.id)}
-                                        className="text-primary-300 hover:text-rose-500 transition-colors"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
+                                    <div className="flex items-center gap-1 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => {
+                                                setSelectedCurso(curso);
+                                                setIsModalOpen(true);
+                                            }}
+                                            className="text-emerald-600 hover:bg-emerald-50 gap-2 h-9 px-3 rounded-lg"
+                                        >
+                                            <UserPlus className="w-4 h-4" />
+                                            <span className="text-[10px] font-bold uppercase">Asignar</span>
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => handleDeleteCurso(curso.id)}
+                                            className="text-primary-300 hover:text-rose-500 h-9 w-9 rounded-lg"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -210,6 +263,16 @@ export default function ConfigPage() {
                 </section>
 
             </div>
+
+            <AsignarAlumnosModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                curso={selectedCurso}
+                onSuccess={async () => {
+                    const cuRes = await getCursos();
+                    if (cuRes.data) setCursos(cuRes.data);
+                }}
+            />
         </div>
     );
 }
