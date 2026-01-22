@@ -1,14 +1,37 @@
+import Hero from '@/components/landing/Hero';
+import SideSection from '@/components/landing/SideSection';
+import TalleresCarousel from '@/components/landing/TalleresCarousel';
+import Footer from '@/components/landing/Footer';
+
 export default function HomePage() {
     return (
-        <main className="min-h-screen bg-neutral-50">
-            <div className="container mx-auto px-4 py-18">
-                <h1 className="font-display text-4xl leading-[1.1] tracking-[-0.02em] text-primary-900 mb-6">
-                    Sistema de Inscripciones
-                </h1>
-                <p className="text-xl text-neutral-800 max-w-2xl">
-                    Colegio San Patricio - Plataforma moderna de inscripciones
-                </p>
-            </div>
+        <main className="min-h-screen">
+            {/* Hero Section */}
+            <Hero />
+
+            {/* About Section (Image Right) */}
+            <SideSection
+                id="nosotros"
+                subtitle="Institución"
+                title="Excelencia que inspira el mañana."
+                description="Con más de 75 años de trayectoria, el Colegio San Patricio combina la tradición pedagógica con las metodologías más innovadoras del siglo XXI. Nuestro compromiso es brindar una educación de vanguardia centrada en el desarrollo del ser."
+                image="/images/section-1.png"
+            />
+
+
+
+            {/* Activities Section (Image Left) */}
+            <SideSection
+                subtitle="Vida Escolar"
+                title="Mucho más que un aula."
+                description="Creemos en la formación integral. Desde deportes de alto nivel hasta laboratorios de ciencia y artes creativas, nuestros alumnos disponen de los mejores espacios y recursos para descubrir y potenciar sus talentos únicos."
+                image="/images/section-2.png"
+                reverse
+            />
+            {/* Talleres Section */}
+            <TalleresCarousel />
+            {/* Footer Section */}
+            <Footer />
         </main>
-    )
+    );
 }

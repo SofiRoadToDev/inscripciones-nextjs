@@ -28,7 +28,7 @@ export default async function AdminDashboard() {
     return (
         <div className="space-y-10">
             <header className="flex flex-col gap-1">
-                <h1 className="text-display font-display text-primary-900 leading-tight">Gestión de Inscripciones</h1>
+                <h1 className="text-display font-display text-primary-900 text-4xl leading-tight">Gestión de Inscripciones</h1>
                 <p className="text-primary-600">Supervise y gestione las solicitudes de ingreso al ciclo lectivo.</p>
             </header>
 
