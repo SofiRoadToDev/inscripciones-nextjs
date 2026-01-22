@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.1"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       alumnos: {
@@ -110,16 +85,19 @@ export type Database = {
           id: string
           nivel_codigo: string
           nombre: string
+          turno: Database["public"]["Enums"]["turno"] | null
         }
         Insert: {
           id?: string
           nivel_codigo: string
           nombre: string
+          turno?: Database["public"]["Enums"]["turno"] | null
         }
         Update: {
           id?: string
           nivel_codigo?: string
           nombre?: string
+          turno?: Database["public"]["Enums"]["turno"] | null
         }
         Relationships: [
           {
@@ -163,7 +141,7 @@ export type Database = {
           calle: string
           casa_lote: string | null
           created_at: string | null
-          departamento_id: string | null
+          departamento: string
           id: string
           localidad_id: string
           numero: string
@@ -175,7 +153,7 @@ export type Database = {
           calle: string
           casa_lote?: string | null
           created_at?: string | null
-          departamento_id?: string | null
+          departamento: string
           id?: string
           localidad_id: string
           numero: string
@@ -187,7 +165,7 @@ export type Database = {
           calle?: string
           casa_lote?: string | null
           created_at?: string | null
-          departamento_id?: string | null
+          departamento?: string
           id?: string
           localidad_id?: string
           numero?: string
@@ -195,13 +173,6 @@ export type Database = {
           provincia_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "domicilios_departamento_id_fkey"
-            columns: ["departamento_id"]
-            isOneToOne: false
-            referencedRelation: "departamentos"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "domicilios_localidad_id_fkey"
             columns: ["localidad_id"]
@@ -278,48 +249,51 @@ export type Database = {
       inscripciones: {
         Row: {
           alumno_id: string
+          audit_user_id: string | null
           ciclo_lectivo: string
           created_at: string | null
-          curso_id: string
+          curso_id: string | null
           domicilio_id: string
           escuela_procedencia_id: string | null
           estado: string
-          fecha_inscripcion: string | null
           ficha_salud_id: string
           id: string
           materias_pendientes: string | null
+          motivo_rechazo: string | null
           nivel_codigo: string
           repite: boolean | null
           updated_at: string | null
         }
         Insert: {
           alumno_id: string
+          audit_user_id?: string | null
           ciclo_lectivo: string
           created_at?: string | null
-          curso_id: string
+          curso_id?: string | null
           domicilio_id: string
           escuela_procedencia_id?: string | null
           estado?: string
-          fecha_inscripcion?: string | null
           ficha_salud_id: string
           id?: string
           materias_pendientes?: string | null
+          motivo_rechazo?: string | null
           nivel_codigo: string
           repite?: boolean | null
           updated_at?: string | null
         }
         Update: {
           alumno_id?: string
+          audit_user_id?: string | null
           ciclo_lectivo?: string
           created_at?: string | null
-          curso_id?: string
+          curso_id?: string | null
           domicilio_id?: string
           escuela_procedencia_id?: string | null
           estado?: string
-          fecha_inscripcion?: string | null
           ficha_salud_id?: string
           id?: string
           materias_pendientes?: string | null
+          motivo_rechazo?: string | null
           nivel_codigo?: string
           repite?: boolean | null
           updated_at?: string | null
@@ -410,31 +384,21 @@ export type Database = {
       }
       localidades: {
         Row: {
-          departamento_id: string | null
           id: string
           nombre: string
           provincia_id: string
         }
         Insert: {
-          departamento_id?: string | null
           id?: string
           nombre: string
           provincia_id: string
         }
         Update: {
-          departamento_id?: string | null
           id?: string
           nombre?: string
           provincia_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "localidades_departamento_id_fkey"
-            columns: ["departamento_id"]
-            isOneToOne: false
-            referencedRelation: "departamentos"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "localidades_provincia_id_fkey"
             columns: ["provincia_id"]
@@ -497,7 +461,9 @@ export type Database = {
           id: string
           inscripcion_id: string
           monto: number
+          observaciones: string | null
           pagado: boolean | null
+          user_id: string | null
         }
         Insert: {
           concepto_pago_id: string
@@ -506,7 +472,9 @@ export type Database = {
           id?: string
           inscripcion_id: string
           monto: number
+          observaciones?: string | null
           pagado?: boolean | null
+          user_id?: string | null
         }
         Update: {
           concepto_pago_id?: string
@@ -515,7 +483,9 @@ export type Database = {
           id?: string
           inscripcion_id?: string
           monto?: number
+          observaciones?: string | null
           pagado?: boolean | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -533,6 +503,75 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      preceptor_cursos: {
+        Row: {
+          created_at: string | null
+          curso_id: string
+          id: string
+          preceptor_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          curso_id: string
+          id?: string
+          preceptor_id: string
+        }
+        Update: {
+          created_at?: string | null
+          curso_id?: string
+          id?: string
+          preceptor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preceptor_cursos_curso_id_fkey"
+            columns: ["curso_id"]
+            isOneToOne: false
+            referencedRelation: "cursos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "preceptor_cursos_preceptor_id_fkey"
+            columns: ["preceptor_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      perfiles: {
+        Row: {
+          apellido: string | null
+          created_at: string | null
+          dni: string | null
+          id: string
+          nombre: string
+          role: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          apellido?: string | null
+          created_at?: string | null
+          dni?: string | null
+          id?: string
+          nombre: string
+          role: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          apellido?: string | null
+          created_at?: string | null
+          dni?: string | null
+          id?: string
+          nombre?: string
+          role?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       provincias: {
         Row: {
@@ -598,80 +637,44 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      crear_inscripcion_completa:
-        | {
-            Args: {
-              p_alergias: string
-              p_alumno_apellido: string
-              p_alumno_dni: string
-              p_alumno_email: string
-              p_alumno_fecha_nacimiento: string
-              p_alumno_foto_url: string
-              p_alumno_genero: string
-              p_alumno_nacionalidad: string
-              p_alumno_nombre: string
-              p_alumno_telefono: string
-              p_ciclo_lectivo: string
-              p_curso_id: string
-              p_discapacidad: string
-              p_domicilio_barrio: string
-              p_domicilio_calle: string
-              p_domicilio_casa_lote: string
-              p_domicilio_departamento: string
-              p_domicilio_localidad_id: string
-              p_domicilio_numero: string
-              p_domicilio_piso_depto: string
-              p_domicilio_provincia_id: string
-              p_enfermedad_cronica: string
-              p_escuela_procedencia_id: string
-              p_materias_pendientes: string
-              p_medicamentos: string
-              p_nivel_codigo: string
-              p_observaciones: string
-              p_repite: boolean
-              p_tutores: Json
-              p_vacunacion_completa: boolean
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              p_alergias: string
-              p_alumno_apellido: string
-              p_alumno_dni: string
-              p_alumno_email: string
-              p_alumno_fecha_nacimiento: string
-              p_alumno_foto_url: string
-              p_alumno_genero: string
-              p_alumno_nacionalidad: string
-              p_alumno_nombre: string
-              p_alumno_telefono: string
-              p_ciclo_lectivo: string
-              p_curso_id: string
-              p_discapacidad: string
-              p_domicilio_barrio: string
-              p_domicilio_calle: string
-              p_domicilio_casa_lote: string
-              p_domicilio_departamento_id: string
-              p_domicilio_localidad_id: string
-              p_domicilio_numero: string
-              p_domicilio_piso_depto: string
-              p_domicilio_provincia_id: string
-              p_enfermedad_cronica: string
-              p_escuela_procedencia_id: string
-              p_materias_pendientes: string
-              p_medicamentos: string
-              p_nivel_codigo: string
-              p_observaciones: string
-              p_repite: boolean
-              p_tutores: Json
-              p_vacunacion_completa: boolean
-            }
-            Returns: string
-          }
+      crear_inscripcion_completa: {
+        Args: {
+          p_alumno_apellido: string
+          p_alumno_nombre: string
+          p_alumno_dni: string
+          p_alumno_fecha_nacimiento: string
+          p_alumno_nacionalidad: string
+          p_alumno_genero: string
+          p_alumno_foto_url: string
+          p_alumno_email: string
+          p_alumno_telefono: string
+          p_domicilio_calle: string
+          p_domicilio_numero: string
+          p_domicilio_piso_depto: string
+          p_domicilio_casa_lote: string
+          p_domicilio_barrio: string
+          p_domicilio_provincia_id: string
+          p_domicilio_departamento: string
+          p_domicilio_localidad_id: string
+          p_ciclo_lectivo: string
+          p_curso_id: string
+          p_nivel_codigo: string
+          p_repite: boolean
+          p_materias_pendientes: string
+          p_escuela_procedencia_id: string
+          p_enfermedad_cronica: string
+          p_alergias: string
+          p_discapacidad: string
+          p_medicamentos: string
+          p_vacunacion_completa: boolean
+          p_observaciones: string
+          p_tutores: Json
+        }
+        Returns: string
+      }
     }
     Enums: {
-      [_ in never]: never
+      turno: "Mañana" | "Tarde"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -679,128 +682,119 @@ export type Database = {
   }
 }
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
-
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = Database["public"]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+  | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof Database
   }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+  ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+    Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+  : never = never,
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+    Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
-    ? R
-    : never
+  ? R
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
+    DefaultSchema["Views"])
+  ? (DefaultSchema["Tables"] &
+    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+      Row: infer R
+    }
+  ? R
+  : never
+  : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof Database
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
+  ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+    Insert: infer I
+  }
+  ? I
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Insert: infer I
+  }
+  ? I
+  : never
+  : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof Database
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
+  ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+    Update: infer U
+  }
+  ? U
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Update: infer U
+  }
+  ? U
+  : never
+  : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Enums"]
+  | { schema: keyof Database },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof Database
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+  ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+  : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof Database
 }
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+  : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["CompositeTypes"]
+  | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof Database
   }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+  ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+  : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof Database
 }
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
-    Enums: {},
+    Enums: {
+      turno: ["Mañana", "Tarde"],
+    },
   },
 } as const

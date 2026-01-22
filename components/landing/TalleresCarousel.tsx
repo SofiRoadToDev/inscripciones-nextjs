@@ -64,8 +64,7 @@ export default function TalleresCarousel() {
                 {/* Carousel Container */}
                 <div
                     ref={scrollRef}
-                    className="flex gap-12 overflow-x-auto pb-8 snap-x snap-mandatory no-scrollbar"
-                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                    className="flex gap-12 overflow-x-auto pb-8 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                 >
                     {TALLERES.map((taller) => (
                         <div key={taller.id} className="snap-center shrink-0">
@@ -77,12 +76,6 @@ export default function TalleresCarousel() {
                     ))}
                 </div>
             </div>
-
-            <style jsx global>{`
-                .no-scrollbar::-webkit-scrollbar {
-                    display: none;
-                }
-            `}</style>
         </section>
     );
 }

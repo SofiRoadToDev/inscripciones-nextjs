@@ -65,7 +65,7 @@ export default function LoginForm() {
                         />
                         {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-2 mb-5">
                         <Label htmlFor="password" title="Contraseña" className="text-primary-900">Contraseña</Label>
                         <Input
                             id="password"

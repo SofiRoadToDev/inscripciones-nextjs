@@ -19,8 +19,8 @@ export default function LoginPage() {
 
             <div className="w-full flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-700">
                 <div className="text-center space-y-2">
-                    <h1 className="text-display font-display text-primary-900">Colegio San Patricio</h1>
-                    <p className="text-accent-600 tracking-widest uppercase text-sm font-semibold">Sistema de Inscripciones</p>
+                    <h1 className="text-display font-display text-primary-900 text-4xl">Colegio San Patricio</h1>
+                    <p className="text-accent-600 tracking-widest uppercase text-sm text-4xl font-semibold">Sistema de Inscripciones</p>
                 </div>
 
                 <LoginForm />

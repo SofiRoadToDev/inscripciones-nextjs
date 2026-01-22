@@ -4,34 +4,24 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
     Users,
-    CreditCard,
-    BarChart3,
-    Settings,
+    LayoutDashboard,
     LogOut,
     Menu,
     X,
     GraduationCap,
-    UserCog
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import { logoutAction } from '@/lib/actions/auth.actions';
 
 const navigation = [
-    { name: 'Inscripciones', href: '/admin', icon: Users },
-    { name: 'Tesorería', href: '/admin/tesoreria', icon: CreditCard },
-    { name: 'Reportes', href: '/admin/reportes', icon: BarChart3 },
-    { name: 'Preceptores', href: '/admin/preceptores', icon: UserCog },
-    { name: 'Configuración', href: '/admin/config', icon: Settings },
+    { name: 'Dashboard', href: '/preceptor/dashboard', icon: LayoutDashboard },
+    { name: 'Mis Alumnos', href: '/preceptor/alumnos', icon: Users },
 ];
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function PreceptorLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-    // No render layout on login page
-    if (pathname === '/admin/login') return <>{children}</>;
 
     return (
         <div className="min-h-screen bg-neutral-50 flex">
@@ -56,7 +46,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                             </div>
                             <div>
                                 <h1 className="font-display text-xl text-primary-900 leading-none">San Patricio</h1>
-                                <p className="text-[10px] tracking-widest text-accent-600 uppercase font-bold mt-1">Admin Panel</p>
+                                <p className="text-[10px] tracking-widest text-accent-600 uppercase font-bold mt-1">Preceptor Portal</p>
                             </div>
                         </div>
                     </div>
@@ -112,11 +102,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
                     <div className="ml-auto flex items-center gap-4">
                         <div className="text-right hidden sm:block">
-                            <p className="text-sm font-semibold text-primary-900">Admin Usuario</p>
-                            <p className="text-xs text-primary-500">Administrador General</p>
+                            <p className="text-sm font-semibold text-primary-900">Preceptor</p>
+                            <p className="text-xs text-primary-500">Gestión Operativa</p>
                         </div>
                         <div className="w-10 h-10 rounded-full bg-primary-100 border border-primary-200 flex items-center justify-center text-primary-600 font-bold">
-                            A
+                            P
                         </div>
                     </div>
                 </header>
