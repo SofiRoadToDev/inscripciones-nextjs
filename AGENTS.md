@@ -1,0 +1,2 @@
+Cuando te pida algo vas a darme una lista de pasos con breve descripcion, apruebo y ejecutar. Al terminar solo me decis "Finalizado".
+Cuando te pregunte algo responde sin ejemplos ni codigo a menos que lo solicite explicitamente.

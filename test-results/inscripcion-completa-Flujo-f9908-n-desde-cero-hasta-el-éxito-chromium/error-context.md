@@ -1,0 +1,97 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - heading "Formulario de Inscripción" [level=1] [ref=e5]
+      - paragraph [ref=e6]: Siga los pasos para formalizar la inscripción del ciclo lectivo 2026
+    - generic [ref=e7]:
+      - tablist [ref=e8]:
+        - tab "1. Alumno" [ref=e9]
+        - tab "2. Tutores" [selected] [ref=e10]
+        - tab "3. Salud" [ref=e11]
+        - tab "4. Inscripción" [ref=e12]
+      - tabpanel "2. Tutores" [ref=e14]:
+        - generic [ref=e15]:
+          - generic [ref=e17]:
+            - generic [ref=e19]:
+              - generic [ref=e20]: "1"
+              - generic [ref=e21]:
+                - generic [ref=e22]: Tutor / Responsable
+                - paragraph [ref=e23]: Datos del responsable legal o contacto
+            - generic [ref=e24]:
+              - generic [ref=e25]:
+                - generic [ref=e26]:
+                  - img [ref=e27]
+                  - heading "Información Personal" [level=3] [ref=e30]
+                - generic [ref=e31]:
+                  - generic [ref=e32]:
+                    - generic [ref=e33]: Apellido
+                    - textbox "Apellido" [ref=e34]:
+                      - /placeholder: "Ej: Perez"
+                  - generic [ref=e35]:
+                    - generic [ref=e36]: Nombre
+                    - textbox "Nombre" [ref=e37]:
+                      - /placeholder: "Ej: Juan Carlos"
+                - generic [ref=e38]:
+                  - generic [ref=e39]:
+                    - generic [ref=e40]: DNI
+                    - textbox "DNI" [ref=e41]:
+                      - /placeholder: Sin puntos
+                  - generic [ref=e42]:
+                    - generic [ref=e43]: Vínculo
+                    - combobox "Vínculo" [ref=e44]:
+                      - generic: Seleccione
+                      - img
+                    - combobox [ref=e45]
+                  - generic [ref=e46]:
+                    - generic [ref=e47]: Teléfono de Contacto
+                    - generic [ref=e48]:
+                      - img [ref=e49]
+                      - textbox "+54 9 387 ..." [ref=e51]
+              - generic [ref=e52]:
+                - generic [ref=e53]:
+                  - img [ref=e54]
+                  - heading "Educación y Ocupación" [level=3] [ref=e57]
+                - generic [ref=e58]:
+                  - generic [ref=e59]:
+                    - generic [ref=e60]: Nivel de Estudios
+                    - combobox "Nivel de Estudios" [ref=e61]:
+                      - generic [ref=e62]:
+                        - img
+                        - generic: Seleccione nivel
+                      - img
+                    - combobox [ref=e63]
+                  - generic [ref=e64]:
+                    - generic [ref=e65]: Ocupación / Profesión
+                    - textbox "Ocupación / Profesión" [ref=e66]:
+                      - /placeholder: "Ej: Empleado de comercio"
+              - generic [ref=e67]:
+                - generic [ref=e68]:
+                  - generic [ref=e69]:
+                    - img [ref=e70]
+                    - heading "Domicilio" [level=3] [ref=e73]
+                  - generic [ref=e74]:
+                    - checkbox "Vive con el alumno" [checked] [ref=e75]:
+                      - generic:
+                        - img
+                    - checkbox [checked]
+                    - generic [ref=e77] [cursor=pointer]: Vive con el alumno
+                - generic [ref=e78]:
+                  - generic [ref=e79]: Info
+                  - paragraph [ref=e80]: Se utilizará la misma dirección declarada para el alumno.
+          - button "Agregar otro tutor / contacto de emergencia" [ref=e81]:
+            - img
+            - text: Agregar otro tutor / contacto de emergencia
+          - generic [ref=e82]:
+            - button "Anterior" [ref=e83]:
+              - img
+              - text: Anterior
+            - button "Siguiente" [ref=e84]:
+              - text: Siguiente
+              - img
+  - button "Open Next.js Dev Tools" [ref=e90] [cursor=pointer]:
+    - img [ref=e91]
+  - alert [ref=e94]
+```

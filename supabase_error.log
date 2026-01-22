@@ -1,0 +1,182 @@
+open supabase\.temp\profile: El sistema no puede encontrar el archivo especificado.
+Loading project ref from file: supabase\.temp\project-ref
+Resolved DNS: [2600:1f1e:75b:4b16:af5a:4d4:ad01:c0ec]:5432
+Initialising login role...
+Using access token for profile: supabase
+Supabase CLI 2.72.0
+Using profile: supabase (supabase.co)
+Connecting to remote database...
+2026/01/08 15:42:11 PG Send: {"Type":"StartupMessage","ProtocolVersion":196608,"Parameters":{"database":"postgres","user":"cli_login_postgres"}}
+2026/01/08 15:42:11 PG Recv: {"Type":"AuthenticationSASL","AuthMechanisms":["SCRAM-SHA-256"]}
+2026/01/08 15:42:11 PG Send: {"Type":"SASLInitialResponse","AuthMechanism":"SCRAM-SHA-256","Data":"n,,n=,r=FSC2BWPpbCuUHVJBvVaB5L8N"}
+2026/01/08 15:42:11 PG Recv: {"Type":"AuthenticationSASLContinue","Data":"r=FSC2BWPpbCuUHVJBvVaB5L8NmNfSsiTfKK0RXJ2jiJzHP8jI,s=t209vYNn/WRRHxayGe8UnA==,i=4096"}
+2026/01/08 15:42:11 PG Send: {"Type":"SASLResponse","Data":"c=biws,r=FSC2BWPpbCuUHVJBvVaB5L8NmNfSsiTfKK0RXJ2jiJzHP8jI,p=SeifHwC4Suzrhg7WuSLwUvjsssClwMp3h7hV8qLcgS8="}
+2026/01/08 15:42:11 PG Recv: {"Type":"AuthenticationSASLFinal","Data":"v=XhhsdKD0LLOHLMtGc3XuXT9wNguIJw2j2Av3tTCksbE="}
+2026/01/08 15:42:11 PG Recv: {"Type":"AuthenticationOK"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ParameterStatus","Name":"in_hot_standby","Value":"off"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ParameterStatus","Name":"integer_datetimes","Value":"on"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ParameterStatus","Name":"TimeZone","Value":"UTC"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ParameterStatus","Name":"IntervalStyle","Value":"postgres"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ParameterStatus","Name":"is_superuser","Value":"off"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ParameterStatus","Name":"application_name","Value":""}
+2026/01/08 15:42:11 PG Recv: {"Type":"ParameterStatus","Name":"default_transaction_read_only","Value":"off"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ParameterStatus","Name":"scram_iterations","Value":"4096"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ParameterStatus","Name":"DateStyle","Value":"ISO, MDY"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ParameterStatus","Name":"standard_conforming_strings","Value":"on"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ParameterStatus","Name":"session_authorization","Value":"cli_login_postgres"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ParameterStatus","Name":"client_encoding","Value":"UTF8"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ParameterStatus","Name":"server_version","Value":"17.6"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ParameterStatus","Name":"server_encoding","Value":"UTF8"}
+2026/01/08 15:42:11 PG Recv: {"Type":"BackendKeyData","ProcessID":8232,"SecretKey":4134542699}
+2026/01/08 15:42:11 PG Recv: {"Type":"ReadyForQuery","TxStatus":"I"}
+2026/01/08 15:42:11 PG Send: {"Type":"Query","String":"SET SESSION ROLE postgres"}
+2026/01/08 15:42:11 PG Recv: {"Type":"CommandComplete","CommandTag":"SET"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ReadyForQuery","TxStatus":"I"}
+2026/01/08 15:42:11 PG Send: {"Type":"Parse","Name":"lrupsc_1_0","Query":"SELECT version FROM supabase_migrations.schema_migrations ORDER BY version","ParameterOIDs":null}
+2026/01/08 15:42:11 PG Send: {"Type":"Describe","ObjectType":"S","Name":"lrupsc_1_0"}
+2026/01/08 15:42:11 PG Send: {"Type":"Sync"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ParseComplete"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ParameterDescription","ParameterOIDs":[]}
+2026/01/08 15:42:11 PG Recv: {"Type":"RowDescription","Fields":[{"Name":"version","TableOID":17501,"TableAttributeNumber":1,"DataTypeOID":25,"DataTypeSize":-1,"TypeModifier":-1,"Format":0}]}
+2026/01/08 15:42:11 PG Recv: {"Type":"ReadyForQuery","TxStatus":"I"}
+2026/01/08 15:42:11 PG Send: {"Type":"Bind","DestinationPortal":"","PreparedStatement":"lrupsc_1_0","ParameterFormatCodes":null,"Parameters":[],"ResultFormatCodes":[0]}
+2026/01/08 15:42:11 PG Send: {"Type":"Describe","ObjectType":"P","Name":""}
+2026/01/08 15:42:11 PG Send: {"Type":"Execute","Portal":"","MaxRows":0}
+2026/01/08 15:42:11 PG Send: {"Type":"Sync"}
+2026/01/08 15:42:11 PG Recv: {"Type":"BindComplete"}
+2026/01/08 15:42:11 PG Recv: {"Type":"RowDescription","Fields":[{"Name":"version","TableOID":17501,"TableAttributeNumber":1,"DataTypeOID":25,"DataTypeSize":-1,"TypeModifier":-1,"Format":0}]}
+2026/01/08 15:42:11 PG Recv: {"Type":"DataRow","Values":[{"text":"20260108174547"}]}
+2026/01/08 15:42:11 PG Recv: {"Type":"DataRow","Values":[{"text":"20260108180759"}]}
+2026/01/08 15:42:11 PG Recv: {"Type":"CommandComplete","CommandTag":"SELECT 2"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ReadyForQuery","TxStatus":"I"}
+Do you want to push these migrations to the remote database?
+ ÔÇó 20260108182859_seed_test_data.sql
+System.Management.Automation.RemoteException
+ [Y/n] y
+2026/01/08 15:42:11 PG Send: {"Type":"Parse","Name":"","Query":"SET lock_timeout = '4s'","ParameterOIDs":null}
+2026/01/08 15:42:11 PG Send: {"Type":"Bind","DestinationPortal":"","PreparedStatement":"","ParameterFormatCodes":null,"Parameters":[],"ResultFormatCodes":[]}
+2026/01/08 15:42:11 PG Send: {"Type":"Describe","ObjectType":"P","Name":""}
+2026/01/08 15:42:11 PG Send: {"Type":"Execute","Portal":"","MaxRows":0}
+2026/01/08 15:42:11 PG Send: {"Type":"Parse","Name":"","Query":"CREATE SCHEMA IF NOT EXISTS supabase_migrations","ParameterOIDs":null}
+2026/01/08 15:42:11 PG Send: {"Type":"Bind","DestinationPortal":"","PreparedStatement":"","ParameterFormatCodes":null,"Parameters":[],"ResultFormatCodes":[]}
+2026/01/08 15:42:11 PG Send: {"Type":"Describe","ObjectType":"P","Name":""}
+2026/01/08 15:42:11 PG Send: {"Type":"Execute","Portal":"","MaxRows":0}
+2026/01/08 15:42:11 PG Send: {"Type":"Parse","Name":"","Query":"CREATE TABLE IF NOT EXISTS supabase_migrations.schema_migrations (version text NOT NULL PRIMARY KEY)","ParameterOIDs":null}
+2026/01/08 15:42:11 PG Send: {"Type":"Bind","DestinationPortal":"","PreparedStatement":"","ParameterFormatCodes":null,"Parameters":[],"ResultFormatCodes":[]}
+2026/01/08 15:42:11 PG Send: {"Type":"Describe","ObjectType":"P","Name":""}
+2026/01/08 15:42:11 PG Send: {"Type":"Execute","Portal":"","MaxRows":0}
+2026/01/08 15:42:11 PG Send: {"Type":"Parse","Name":"","Query":"ALTER TABLE supabase_migrations.schema_migrations ADD COLUMN IF NOT EXISTS statements text[]","ParameterOIDs":null}
+2026/01/08 15:42:11 PG Send: {"Type":"Bind","DestinationPortal":"","PreparedStatement":"","ParameterFormatCodes":null,"Parameters":[],"ResultFormatCodes":[]}
+2026/01/08 15:42:11 PG Send: {"Type":"Describe","ObjectType":"P","Name":""}
+2026/01/08 15:42:11 PG Send: {"Type":"Execute","Portal":"","MaxRows":0}
+2026/01/08 15:42:11 PG Send: {"Type":"Parse","Name":"","Query":"ALTER TABLE supabase_migrations.schema_migrations ADD COLUMN IF NOT EXISTS name text","ParameterOIDs":null}
+2026/01/08 15:42:11 PG Send: {"Type":"Bind","DestinationPortal":"","PreparedStatement":"","ParameterFormatCodes":null,"Parameters":[],"ResultFormatCodes":[]}
+2026/01/08 15:42:11 PG Send: {"Type":"Describe","ObjectType":"P","Name":""}
+2026/01/08 15:42:11 PG Send: {"Type":"Execute","Portal":"","MaxRows":0}
+2026/01/08 15:42:11 PG Send: {"Type":"Sync"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ParseComplete"}
+2026/01/08 15:42:11 PG Recv: {"Type":"BindComplete"}
+2026/01/08 15:42:11 PG Recv: {"Type":"NoData"}
+2026/01/08 15:42:11 PG Recv: {"Type":"CommandComplete","CommandTag":"SET"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ParseComplete"}
+2026/01/08 15:42:11 PG Recv: {"Type":"BindComplete"}
+2026/01/08 15:42:11 PG Recv: {"Type":"NoData"}
+2026/01/08 15:42:11 PG Recv: {"Severity":"NOTICE","SeverityUnlocalized":"NOTICE","Code":"42P06","Message":"schema \"supabase_migrations\" already exists, skipping","Detail":"","Hint":"","Position":0,"InternalPosition":0,"InternalQuery":"","Where":"","SchemaName":"","TableName":"","ColumnName":"","DataTypeName":"","ConstraintName":"","File":"schemacmds.c","Line":132,"Routine":"CreateSchemaCommand","UnknownFields":null}
+2026/01/08 15:42:11 PG Recv: {"Type":"CommandComplete","CommandTag":"CREATE SCHEMA"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ParseComplete"}
+2026/01/08 15:42:11 PG Recv: {"Type":"BindComplete"}
+2026/01/08 15:42:11 PG Recv: {"Type":"NoData"}
+2026/01/08 15:42:11 PG Recv: {"Severity":"NOTICE","SeverityUnlocalized":"NOTICE","Code":"42P07","Message":"relation \"schema_migrations\" already exists, skipping","Detail":"","Hint":"","Position":0,"InternalPosition":0,"InternalQuery":"","Where":"","SchemaName":"","TableName":"","ColumnName":"","DataTypeName":"","ConstraintName":"","File":"parse_utilcmd.c","Line":207,"Routine":"transformCreateStmt","UnknownFields":null}
+2026/01/08 15:42:11 PG Recv: {"Type":"CommandComplete","CommandTag":"CREATE TABLE"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ParseComplete"}
+2026/01/08 15:42:11 PG Recv: {"Type":"BindComplete"}
+2026/01/08 15:42:11 PG Recv: {"Type":"NoData"}
+2026/01/08 15:42:11 PG Recv: {"Severity":"NOTICE","SeverityUnlocalized":"NOTICE","Code":"42701","Message":"column \"statements\" of relation \"schema_migrations\" already exists, skipping","Detail":"","Hint":"","Position":0,"InternalPosition":0,"InternalQuery":"","Where":"","SchemaName":"","TableName":"","ColumnName":"","DataTypeName":"","ConstraintName":"","File":"tablecmds.c","Line":7471,"Routine":"check_for_column_name_collision","UnknownFields":null}
+2026/01/08 15:42:11 PG Recv: {"Type":"CommandComplete","CommandTag":"ALTER TABLE"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ParseComplete"}
+2026/01/08 15:42:11 PG Recv: {"Type":"BindComplete"}
+2026/01/08 15:42:11 PG Recv: {"Type":"NoData"}
+2026/01/08 15:42:11 PG Recv: {"Severity":"NOTICE","SeverityUnlocalized":"NOTICE","Code":"42701","Message":"column \"name\" of relation \"schema_migrations\" already exists, skipping","Detail":"","Hint":"","Position":0,"InternalPosition":0,"InternalQuery":"","Where":"","SchemaName":"","TableName":"","ColumnName":"","DataTypeName":"","ConstraintName":"","File":"tablecmds.c","Line":7471,"Routine":"check_for_column_name_collision","UnknownFields":null}
+2026/01/08 15:42:11 PG Recv: {"Type":"CommandComplete","CommandTag":"ALTER TABLE"}
+2026/01/08 15:42:11 PG Recv: {"Type":"ReadyForQuery","TxStatus":"I"}
+Applying migration 20260108182859_seed_test_data.sql...
+2026/01/08 15:42:11 PG Send: {"Type":"Query","String":"RESET ALL"}
+2026/01/08 15:42:12 PG Recv: {"Type":"CommandComplete","CommandTag":"RESET"}
+2026/01/08 15:42:12 PG Recv: {"Type":"ReadyForQuery","TxStatus":"I"}
+2026/01/08 15:42:12 PG Send: {"Type":"Parse","Name":"","Query":"-- Seed de datos para Provincias, Departamentos y Localidades (Salta y Jujuy)\r\n-- Alumno de prueba para buscador de DNI\r\n\r\nDO $$\r\nDECLARE\r\n    prov_salta_id UUID;\r\n    prov_jujuy_id UUID;\r\n    dept_capital_salta_id UUID;\r\n    dept_oran_id UUID;\r\n    dept_capital_jujuy_id UUID;\r\n    alumno_id UUID;\r\n    domicilio_id UUID;\r\n    salud_id UUID;\r\n    inscripcion_id UUID;\r\n    curso_id UUID;\r\n    escuela_id UUID;\r\nBEGIN\r\n    -- 1. Provincias\r\n    INSERT INTO provincias (nombre) VALUES ('Salta') RETURNING id INTO prov_salta_id;\r\n    INSERT INTO provincias (nombre) VALUES ('Jujuy') RETURNING id INTO prov_jujuy_id;\r\n\r\n    -- 2. Departamentos Salta\r\n    INSERT INTO departamentos (nombre, provincia_id) VALUES ('Capital', prov_salta_id) RETURNING id INTO dept_capital_salta_id;\r\n    INSERT INTO departamentos (nombre, provincia_id) VALUES ('Or+ín', prov_salta_id) RETURNING id INTO dept_oran_id;\r\n    \r\n    -- 3. Departamentos Jujuy\r\n    INSERT INTO departamentos (nombre, provincia_id) VALUES ('Dr. Manuel Belgrano', prov_jujuy_id) RETURNING id INTO dept_capital_jujuy_id;\r\n\r\n    -- 4. Localidades\r\n    INSERT INTO localidades (nombre, departamento_id, provincia_id) VALUES ('Salta Capital', dept_capital_salta_id, prov_salta_id);\r\n    INSERT INTO localidades (nombre, departamento_id, provincia_id) VALUES ('San Ram+¦n de la Nueva Or+ín', dept_oran_id, prov_salta_id);\r\n    INSERT INTO localidades (nombre, departamento_id, provincia_id) VALUES ('San Salvador de Jujuy', dept_capital_jujuy_id, prov_jujuy_id);\r\n\r\n    -- 5. Mas Maestros Necesarios (Cursos, Escuelas, etc para inscripcion historica)\r\n    INSERT INTO niveles (codigo, nombre) VALUES ('SEC', 'Secundario') ON CONFLICT DO NOTHING;\r\n    INSERT INTO cursos (nombre, nivel_codigo) VALUES ('1er A+¦o', 'SEC') RETURNING id INTO curso_id;\r\n    INSERT INTO escuelas_procedencia (nombre) VALUES ('Escuela Normal') RETURNING id INTO escuela_id;\r\n\r\n    -- 6. Alumno de Prueba (DNI: 40000111)\r\n    INSERT INTO alumnos (apellido, nombre, dni, fecha_nacimiento, nacionalidad, genero, email, telefono)\r\n    VALUES ('Perez', 'Mariana', '40000111', '2010-05-15', 'Argentina', 'Femenino', 'mariana@test.com', '3871234567')\r\n    RETURNING id INTO alumno_id;\r\n\r\n    -- 7. Domicilio del Alumno\r\n    INSERT INTO domicilios (calle, numero, provincia_id, departamento_id, localidad_id)\r\n    VALUES ('Av. Belgrano', '1250', prov_salta_id, dept_capital_salta_id, (SELECT id FROM localidades WHERE nombre = 'Salta Capital' LIMIT 1))\r\n    RETURNING id INTO domicilio_id;\r\n\r\n    -- 8. Ficha de Salud\r\n    INSERT INTO fichas_salud (enfermedad_cronica, vacunacion_completa)\r\n    VALUES ('Ninguna', true)\r\n    RETURNING id INTO salud_id;\r\n\r\n    -- 9. Inscripci+¦n hist+¦rica (A+¦o anterior)\r\n    INSERT INTO inscripciones (alumno_id, domicilio_id, ficha_salud_id, ciclo_lectivo, curso_id, nivel_codigo, estado)\r\n    VALUES (alumno_id, domicilio_id, salud_id, '2024', curso_id, 'SEC', 'aprobada')\r\n    RETURNING id INTO inscripcion_id;\r\n\r\n    RAISE NOTICE 'Seed completado. Alumno ID: %, DNI: 40000111', alumno_id;\r\nEND $$","ParameterOIDs":null}
+2026/01/08 15:42:12 PG Send: {"Type":"Bind","DestinationPortal":"","PreparedStatement":"","ParameterFormatCodes":null,"Parameters":[],"ResultFormatCodes":[]}
+2026/01/08 15:42:12 PG Send: {"Type":"Describe","ObjectType":"P","Name":""}
+2026/01/08 15:42:12 PG Send: {"Type":"Execute","Portal":"","MaxRows":0}
+2026/01/08 15:42:12 PG Send: {"Type":"Parse","Name":"","Query":"INSERT INTO supabase_migrations.schema_migrations(version, name, statements) VALUES($1, $2, $3)","ParameterOIDs":[25,25,1009]}
+2026/01/08 15:42:12 PG Send: {"Type":"Bind","DestinationPortal":"","PreparedStatement":"","ParameterFormatCodes":[0,0,1],"Parameters":[{"text":"20260108182859"},{"text":"seed_test_data"},{"binary":"000000010000000000000019000000010000000100000bec2d2d2053656564206465206461746f7320706172612050726f76696e636961732c20446570617274616d656e746f732079204c6f63616c696461646573202853616c74612079204a756a7579290d0a2d2d20416c756d6e6f206465207072756562612070617261206275736361646f7220646520444e490d0a0d0a444f2024240d0a4445434c4152450d0a2020202070726f765f73616c74615f696420555549443b0d0a2020202070726f765f6a756a75795f696420555549443b0d0a20202020646570745f6361706974616c5f73616c74615f696420555549443b0d0a20202020646570745f6f72616e5f696420555549443b0d0a20202020646570745f6361706974616c5f6a756a75795f696420555549443b0d0a20202020616c756d6e6f5f696420555549443b0d0a20202020646f6d6963696c696f5f696420555549443b0d0a2020202073616c75645f696420555549443b0d0a20202020696e736372697063696f6e5f696420555549443b0d0a20202020637572736f5f696420555549443b0d0a2020202065736375656c615f696420555549443b0d0a424547494e0d0a202020202d2d20312e2050726f76696e636961730d0a20202020494e5345525420494e544f2070726f76696e6369617320286e6f6d627265292056414c55455320282753616c746127292052455455524e494e4720696420494e544f2070726f765f73616c74615f69643b0d0a20202020494e5345525420494e544f2070726f76696e6369617320286e6f6d627265292056414c5545532028274a756a757927292052455455524e494e4720696420494e544f2070726f765f6a756a75795f69643b0d0a0d0a202020202d2d20322e20446570617274616d656e746f732053616c74610d0a20202020494e5345525420494e544f20646570617274616d656e746f7320286e6f6d6272652c2070726f76696e6369615f6964292056414c5545532028274361706974616c272c2070726f765f73616c74615f6964292052455455524e494e4720696420494e544f20646570745f6361706974616c5f73616c74615f69643b0d0a20202020494e5345525420494e544f20646570617274616d656e746f7320286e6f6d6272652c2070726f76696e6369615f6964292056414c5545532028274f72c3a16e272c2070726f765f73616c74615f6964292052455455524e494e4720696420494e544f20646570745f6f72616e5f69643b0d0a202020200d0a202020202d2d20332e20446570617274616d656e746f73204a756a75790d0a20202020494e5345525420494e544f20646570617274616d656e746f7320286e6f6d6272652c2070726f76696e6369615f6964292056414c55455320282744722e204d616e75656c2042656c6772616e6f272c2070726f765f6a756a75795f6964292052455455524e494e4720696420494e544f20646570745f6361706974616c5f6a756a75795f69643b0d0a0d0a202020202d2d20342e204c6f63616c6964616465730d0a20202020494e5345525420494e544f206c6f63616c69646164657320286e6f6d6272652c20646570617274616d656e746f5f69642c2070726f76696e6369615f6964292056414c55455320282753616c7461204361706974616c272c20646570745f6361706974616c5f73616c74615f69642c2070726f765f73616c74615f6964293b0d0a20202020494e5345525420494e544f206c6f63616c69646164657320286e6f6d6272652c20646570617274616d656e746f5f69642c2070726f76696e6369615f6964292056414c55455320282753616e2052616dc3b36e206465206c61204e75657661204f72c3a16e272c20646570745f6f72616e5f69642c2070726f765f73616c74615f6964293b0d0a20202020494e5345525420494e544f206c6f63616c69646164657320286e6f6d6272652c20646570617274616d656e746f5f69642c2070726f76696e6369615f6964292056414c55455320282753616e2053616c7661646f72206465204a756a7579272c20646570745f6361706974616c5f6a756a75795f69642c2070726f765f6a756a75795f6964293b0d0a0d0a202020202d2d20352e204d6173204d61657374726f73204e656365736172696f732028437572736f732c2045736375656c61732c20657463207061726120696e736372697063696f6e20686973746f72696361290d0a20202020494e5345525420494e544f206e6976656c65732028636f6469676f2c206e6f6d627265292056414c554553202827534543272c2027536563756e646172696f2729204f4e20434f4e464c49435420444f204e4f5448494e473b0d0a20202020494e5345525420494e544f20637572736f7320286e6f6d6272652c206e6976656c5f636f6469676f292056414c5545532028273165722041c3b16f272c202753454327292052455455524e494e4720696420494e544f20637572736f5f69643b0d0a20202020494e5345525420494e544f2065736375656c61735f70726f636564656e63696120286e6f6d627265292056414c55455320282745736375656c61204e6f726d616c27292052455455524e494e4720696420494e544f2065736375656c615f69643b0d0a0d0a202020202d2d20362e20416c756d6e6f206465205072756562612028444e493a203430303030313131290d0a20202020494e5345525420494e544f20616c756d6e6f7320286170656c6c69646f2c206e6f6d6272652c20646e692c2066656368615f6e6163696d69656e746f2c206e6163696f6e616c696461642c2067656e65726f2c20656d61696c2c2074656c65666f6e6f290d0a2020202056414c554553202827506572657a272c20274d617269616e61272c20273430303030313131272c2027323031302d30352d3135272c2027417267656e74696e61272c202746656d656e696e6f272c20276d617269616e6140746573742e636f6d272c20273338373132333435363727290d0a2020202052455455524e494e4720696420494e544f20616c756d6e6f5f69643b0d0a0d0a202020202d2d20372e20446f6d6963696c696f2064656c20416c756d6e6f0d0a20202020494e5345525420494e544f20646f6d6963696c696f73202863616c6c652c206e756d65726f2c2070726f76696e6369615f69642c20646570617274616d656e746f5f69642c206c6f63616c696461645f6964290d0a2020202056414c55455320282741762e2042656c6772616e6f272c202731323530272c2070726f765f73616c74615f69642c20646570745f6361706974616c5f73616c74615f69642c202853454c4543542069642046524f4d206c6f63616c696461646573205748455245206e6f6d627265203d202753616c7461204361706974616c27204c494d4954203129290d0a2020202052455455524e494e4720696420494e544f20646f6d6963696c696f5f69643b0d0a0d0a202020202d2d20382e2046696368612064652053616c75640d0a20202020494e5345525420494e544f206669636861735f73616c75642028656e6665726d656461645f63726f6e6963612c20766163756e6163696f6e5f636f6d706c657461290d0a2020202056414c5545532028274e696e67756e61272c2074727565290d0a2020202052455455524e494e4720696420494e544f2073616c75645f69643b0d0a0d0a202020202d2d20392e20496e73637269706369c3b36e2068697374c3b372696361202841c3b16f20616e746572696f72290d0a20202020494e5345525420494e544f20696e736372697063696f6e65732028616c756d6e6f5f69642c20646f6d6963696c696f5f69642c2066696368615f73616c75645f69642c206369636c6f5f6c65637469766f2c20637572736f5f69642c206e6976656c5f636f6469676f2c2065737461646f290d0a2020202056414c5545532028616c756d6e6f5f69642c20646f6d6963696c696f5f69642c2073616c75645f69642c202732303234272c20637572736f5f69642c2027534543272c20276170726f6261646127290d0a2020202052455455524e494e4720696420494e544f20696e736372697063696f6e5f69643b0d0a0d0a202020205241495345204e4f5449434520275365656420636f6d706c657461646f2e20416c756d6e6f2049443a20252c20444e493a203430303030313131272c20616c756d6e6f5f69643b0d0a454e44202424"}],"ResultFormatCodes":[]}
+2026/01/08 15:42:12 PG Send: {"Type":"Describe","ObjectType":"P","Name":""}
+2026/01/08 15:42:12 PG Send: {"Type":"Execute","Portal":"","MaxRows":0}
+2026/01/08 15:42:12 PG Send: {"Type":"Sync"}
+2026/01/08 15:42:12 PG Recv: {"Type":"ParseComplete"}
+2026/01/08 15:42:12 PG Recv: {"Type":"BindComplete"}
+2026/01/08 15:42:12 PG Recv: {"Type":"NoData"}
+2026/01/08 15:42:12 PG Recv: {"Type":"ErrorResponse","Severity":"ERROR","SeverityUnlocalized":"ERROR","Code":"42703","Message":"column \"nombre\" of relation \"niveles\" does not exist","Detail":"","Hint":"","Position":0,"InternalPosition":30,"InternalQuery":"INSERT INTO niveles (codigo, nombre) VALUES ('SEC', 'Secundario') ON CONFLICT DO NOTHING","Where":"PL/pgSQL function inline_code_block line 32 at SQL statement","SchemaName":"","TableName":"","ColumnName":"","DataTypeName":"","ConstraintName":"","File":"parse_target.c","Line":1065,"Routine":"checkInsertTargets","UnknownFields":null}
+2026/01/08 15:42:12 PG Recv: {"Type":"ReadyForQuery","TxStatus":"I"}
+2026/01/08 15:42:12 PG Send: {"Type":"Terminate"}
+ERROR: column "nombre" of relation "niveles" does not exist (SQLSTATE 42703)                                                                  
+At statement: 0                                                                                                                               
+-- Seed de datos para Provincias, Departamentos y Localidades (Salta y Jujuy)                                                                 
+-- Alumno de prueba para buscador de DNI                                                                                                      
+                                                                                                                                              
+DO $$                                                                                                                                         
+DECLARE                                                                                                                                       
+    prov_salta_id UUID;                                                                                                                       
+    prov_jujuy_id UUID;                                                                                                                       
+    dept_capital_salta_id UUID;                                                                                                               
+    dept_oran_id UUID;                                                                                                                        
+    dept_capital_jujuy_id UUID;                                                                                                               
+    alumno_id UUID;                                                                                                                           
+    domicilio_id UUID;                                                                                                                        
+    salud_id UUID;                                                                                                                            
+    inscripcion_id UUID;                                                                                                                      
+    curso_id UUID;                                                                                                                            
+    escuela_id UUID;                                                                                                                          
+BEGIN                                                                                                                                         
+    -- 1. Provincias                                                                                                                          
+    INSERT INTO provincias (nombre) VALUES ('Salta') RETURNING id INTO prov_salta_id;                                                         
+    INSERT INTO provincias (nombre) VALUES ('Jujuy') RETURNING id INTO prov_jujuy_id;                                                         
+                                                                                                                                              
+    -- 2. Departamentos Salta                                                                                                                 
+    INSERT INTO departamentos (nombre, provincia_id) VALUES ('Capital', prov_salta_id) RETURNING id INTO dept_capital_salta_id;               
+    INSERT INTO departamentos (nombre, provincia_id) VALUES ('Or+ín', prov_salta_id) RETURNING id INTO dept_oran_id;                           
+                                                                                                                                              
+    -- 3. Departamentos Jujuy                                                                                                                 
+    INSERT INTO departamentos (nombre, provincia_id) VALUES ('Dr. Manuel Belgrano', prov_jujuy_id) RETURNING id INTO dept_capital_jujuy_id;   
+                                                                                                                                              
+    -- 4. Localidades                                                                                                                         
+    INSERT INTO localidades (nombre, departamento_id, provincia_id) VALUES ('Salta Capital', dept_capital_salta_id, prov_salta_id);           
+    INSERT INTO localidades (nombre, departamento_id, provincia_id) VALUES ('San Ram+¦n de la Nueva Or+ín', dept_oran_id, prov_salta_id);       
+    INSERT INTO localidades (nombre, departamento_id, provincia_id) VALUES ('San Salvador de Jujuy', dept_capital_jujuy_id, prov_jujuy_id);   
+                                                                                                                                              
+    -- 5. Mas Maestros Necesarios (Cursos, Escuelas, etc para inscripcion historica)                                                          
+    INSERT INTO niveles (codigo, nombre) VALUES ('SEC', 'Secundario') ON CONFLICT DO NOTHING;                                                 
+    INSERT INTO cursos (nombre, nivel_codigo) VALUES ('1er A+¦o', 'SEC') RETURNING id INTO curso_id;                                           
+    INSERT INTO escuelas_procedencia (nombre) VALUES ('Escuela Normal') RETURNING id INTO escuela_id;                                         
+                                                                                                                                              
+    -- 6. Alumno de Prueba (DNI: 40000111)                                                                                                    
+    INSERT INTO alumnos (apellido, nombre, dni, fecha_nacimiento, nacionalidad, genero, email, telefono)                                      
+    VALUES ('Perez', 'Mariana', '40000111', '2010-05-15', 'Argentina', 'Femenino', 'mariana@test.com', '3871234567')                          
+    RETURNING id INTO alumno_id;                                                                                                              
+                                                                                                                                              
+    -- 7. Domicilio del Alumno                                                                                                                
+    INSERT INTO domicilios (calle, numero, provincia_id, departamento_id, localidad_id)                                                       
+    VALUES ('Av. Belgrano', '1250', prov_salta_id, dept_capital_salta_id, (SELECT id FROM localidades WHERE nombre = 'Salta Capital' LIMIT 1))
+    RETURNING id INTO domicilio_id;                                                                                                           
+                                                                                                                                              
+    -- 8. Ficha de Salud                                                                                                                      
+    INSERT INTO fichas_salud (enfermedad_cronica, vacunacion_completa)                                                                        
+    VALUES ('Ninguna', true)                                                                                                                  
+    RETURNING id INTO salud_id;                                                                                                               
+                                                                                                                                              
+    -- 9. Inscripci+¦n hist+¦rica (A+¦o anterior)                                                                                                
+    INSERT INTO inscripciones (alumno_id, domicilio_id, ficha_salud_id, ciclo_lectivo, curso_id, nivel_codigo, estado)                        
+    VALUES (alumno_id, domicilio_id, salud_id, '2024', curso_id, 'SEC', 'aprobada')                                                           
+    RETURNING id INTO inscripcion_id;                                                                                                         
+                                                                                                                                              
+    RAISE NOTICE 'Seed completado. Alumno ID: %, DNI: 40000111', alumno_id;                                                                   
+END $$                                                                                                                                        
