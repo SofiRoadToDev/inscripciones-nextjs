@@ -95,13 +95,13 @@ export async function getInscripcionDetalle(id: string) {
         .select(`
       *,
       alumno:alumnos(*),
-      domicilio:domicilios(*, provincia:provincias(nombre), localidad:localidades(nombre)),
+      domicilio:domicilios(*, provincia:provincias(nombre), departamento:departamentos(nombre), localidad:localidades(nombre)),
       ficha_salud:fichas_salud(*),
       inscripciones_tutores(
         vinculo,
         tutor:tutores(
           *,
-          domicilio:domicilios(*, provincia:provincias(nombre), localidad:localidades(nombre))
+          domicilio:domicilios(*, provincia:provincias(nombre), departamento:departamentos(nombre), localidad:localidades(nombre))
         )
       )
     `)
@@ -135,11 +135,11 @@ export async function getPagosAdmin(params: { search?: string; nivel?: string; p
             repite,
             alumno:alumnos(*),
             curso:cursos(id, nombre),
-            domicilio:domicilios(*, provincia:provincias(nombre), localidad:localidades(nombre)),
+            domicilio:domicilios(*, provincia:provincias(nombre), departamento:departamentos(nombre), localidad:localidades(nombre)),
             ficha_salud:fichas_salud(*),
             inscripciones_tutores(
                 vinculo,
-                tutor:tutores(*)
+                tutor:tutores(*, domicilio:domicilios(*, provincia:provincias(nombre), departamento:departamentos(nombre), localidad:localidades(nombre)))
             ),
             pagos:pagos_inscripcion(
                 id,
@@ -391,11 +391,11 @@ export async function getAlumnosByCurso(cursoId: string) {
             nivel_codigo,
             repite,
             alumno:alumnos(*),
-            domicilio:domicilios(*, localidad:localidades(nombre)),
+            domicilio:domicilios(*, provincia:provincias(nombre), departamento:departamentos(nombre), localidad:localidades(nombre)),
             ficha_salud:fichas_salud(*),
             inscripciones_tutores(
                 vinculo,
-                tutor:tutores(*)
+                tutor:tutores(*, domicilio:domicilios(*, provincia:provincias(nombre), departamento:departamentos(nombre), localidad:localidades(nombre)))
             )
         `)
         .eq('curso_id', cursoId)
