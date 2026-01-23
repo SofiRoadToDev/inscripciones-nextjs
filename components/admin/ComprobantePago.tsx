@@ -1,30 +1,30 @@
-'use client';
-
 import { forwardRef } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import Image from 'next/image';
+import { numeroATexto } from '@/lib/utils/number-to-words';
+
+interface Concepto {
+    nombre: string;
+    monto: number;
+    cantidad?: number;
+}
 
 interface Props {
+    id?: number | string;
     alumno: {
         nombre: string;
         apellido: string;
         dni: string;
     };
-    curso: string;
     pago: {
-        concepto: string;
-        monto: number;
         fecha: string;
-        observaciones: string;
+        importe_total: number;
+        conceptos: Concepto[];
     };
 }
 
-const ComprobantePago = forwardRef<HTMLDivElement, Props>(({ alumno, curso, pago }, ref) => {
-    // Reemplazar "Matrícula" por "Aporte Inscripción" como pidió el usuario
-    const conceptoLabel = pago.concepto.toLowerCase().includes('matrícula') || pago.concepto.toLowerCase().includes('matricula')
-        ? 'Aporte Inscripción'
-        : pago.concepto;
-
+const ComprobantePago = forwardRef<HTMLDivElement, Props>(({ id, alumno, pago }, ref) => {
     const safeFormat = (dateStr: string | null | undefined, formatStr: string, options?: any) => {
         if (!dateStr) return 'N/A';
         const date = new Date(dateStr);
@@ -32,85 +32,108 @@ const ComprobantePago = forwardRef<HTMLDivElement, Props>(({ alumno, curso, pago
         return format(date, formatStr, options);
     };
 
+    const normalizedId = id !== undefined && id !== null ? String(id) : '';
+    const reciboId = normalizedId ? `SI-${normalizedId.padStart(8, '0')}` : 'SI-XXXXXXXX';
+
     return (
-        <div ref={ref} className="p-10 bg-white text-black font-sans max-w-[800px] mx-auto border-2 border-gray-200">
-            {/* Header */}
-            <div className="flex justify-between items-start border-b-2 border-primary-900 pb-4 mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold uppercase tracking-tight">Comprobante de Pago</h1>
-                    <p className="text-sm text-gray-500">Sistema de Inscripciones Online</p>
+        <div ref={ref} className="bg-white text-black font-sans w-[800px] h-[500px] mx-auto border-2 border-black grid grid-cols-[200px_1fr] relative overflow-hidden shadow-none">
+            {/* Sidebar con el color azul del diseño original */}
+            <div className="bg-[#DBEAFE] p-6 flex flex-col items-center border-r-2 border-black">
+                <div className="text-center mb-6 space-y-1">
+                    <p className="font-bold text-sm tracking-tight">EET3107</p>
+                    <p className="font-bold text-[10px] leading-tight uppercase">Juana Azurduy de Padilla</p>
                 </div>
-                <div className="text-right">
-                    <p className="text-xs font-bold uppercase text-gray-400">Fecha de Emisión</p>
-                    <p className="font-semibold">{safeFormat(pago.fecha, "PPP", { locale: es })}</p>
+
+                <div className="relative w-28 h-28 mb-8">
+                    <Image
+                        src="/images/escudo.png"
+                        alt="Escudo"
+                        fill
+                        className="object-contain"
+                    />
+                </div>
+
+                <div className="text-center mt-auto space-y-2">
+                    <p className="font-bold text-xs uppercase tracking-widest">Comprobante Nº</p>
+                    <p className="font-mono text-xl font-black bg-white px-2 py-1 border border-black rounded shadow-sm">
+                        {reciboId.split('-')[1]}
+                    </p>
+                    <p className="text-[10px] font-bold text-blue-800 opacity-60">SISTEMA SI</p>
                 </div>
             </div>
 
-            {/* Content */}
-            <div className="space-y-8">
-                {/* Alumno Info */}
-                <div className="grid grid-cols-2 gap-8">
-                    <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase">Apellido y Nombre del Alumno</label>
-                        <p className="text-lg font-bold uppercase border-b border-gray-100 pb-1">{alumno.apellido}, {alumno.nombre}</p>
-                    </div>
-                    <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase">DNI</label>
-                        <p className="text-lg font-bold border-b border-gray-100 pb-1">{alumno.dni}</p>
-                    </div>
-                </div>
-
-                <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase">Curso / División</label>
-                    <p className="text-lg font-bold uppercase border-b border-gray-100 pb-1">{curso || 'SIN ASIGNAR'}</p>
-                </div>
-
-                {/* Concepto e Importe */}
-                <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                    <div className="flex justify-between items-center mb-4">
-                        <span className="text-gray-500 font-medium tracking-tight uppercase">Concepto</span>
-                        <span className="text-gray-500 font-medium tracking-tight uppercase">Importe</span>
-                    </div>
-                    <div className="flex justify-between items-center border-t border-gray-200 pt-4">
-                        <span className="text-xl font-bold uppercase">{conceptoLabel}</span>
-                        <span className="text-3xl font-black font-mono">${pago.monto.toLocaleString('es-AR')}</span>
+            {/* Cuerpo principal con marca de agua */}
+            <div className="p-8 flex flex-col relative bg-white">
+                {/* Marca de agua (Watermark) con escala de grises al 10% */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-[0.08] pointer-events-none -z-0">
+                    <div className="relative w-80 h-80 grayscale">
+                        <Image
+                            src="/images/escudo.png"
+                            alt="Crest Watermark"
+                            fill
+                            className="object-contain"
+                        />
                     </div>
                 </div>
 
-                {/* Observaciones */}
-                <div className="space-y-2 pt-4">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase">Observaciones</label>
-                    <div className="min-h-[80px] p-4 border-2 border-dashed border-gray-200 rounded-xl text-gray-600 italic">
-                        {pago.observaciones || 'Sin observaciones adicionales.'}
-                    </div>
-                </div>
-            </div>
+                <div className="relative z-10 flex flex-col h-full uppercase text-sm">
+                    <h1 className="text-center text-xl font-black mb-10 tracking-tight border-b-2 border-black pb-4">
+                        Comprobante de Aporte a Cooperadora Escolar
+                    </h1>
 
-            {/* Footer */}
-            <div className="mt-16 flex justify-between items-end border-t border-gray-100 pt-8">
-                <div className="text-[10px] text-gray-400 max-w-[300px]">
-                    <p>Este documento es un comprobante de pago válido para trámites internos institucionales.</p>
-                </div>
-                <div className="text-center w-[200px]">
-                    <div className="border-t border-gray-900 pt-2 text-[10px] font-bold uppercase">
-                        Firma y Sello Responsable
+                    <div className="text-right mb-8">
+                        <p className="font-bold">
+                            Salta, {safeFormat(pago.fecha, "d 'de' MMMM 'de' yyyy", { locale: es })}
+                        </p>
+                    </div>
+
+                    <div className="space-y-6 mb-8">
+                        <p className="flex items-baseline gap-2">
+                            Recibí de <span className="font-black border-b border-dotted border-black flex-1 pb-0.5">{alumno.apellido}, {alumno.nombre}</span>
+                        </p>
+                        <p className="flex items-baseline gap-2">
+                            DNI: <span className="font-black border-b border-dotted border-black w-32 pb-0.5">{alumno.dni}</span>
+                        </p>
+                        <p className="flex items-baseline gap-2 leading-relaxed">
+                            la suma de <span className="font-black italic border-b border-dotted border-black flex-1 pb-0.5">{numeroATexto(pago.importe_total)} pesos</span>
+                        </p>
+                    </div>
+
+                    <div className="mb-6 flex-1">
+                        <p className="font-black mb-3 text-xs tracking-widest">En concepto de:</p>
+                        <ul className="space-y-2 ml-4">
+                            {pago.conceptos.map((c, i) => (
+                                <li key={i} className="flex justify-between items-center border-b border-gray-100 pb-1">
+                                    <span className="font-medium text-[12px]">• {c.nombre} {c.cantidad ? `(Cant: ${c.cantidad})` : ''}</span>
+                                    {/*<span className="font-black tracking-tight">${c.monto.toLocaleString('es-AR')}</span>*/}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* Fila inferior con el monto y la firma */}
+                    <div className="flex justify-between items-end mt-auto pt-6 border-t-2 border-black">
+                        <div className="bg-gray-50 border-2 border-black px-4 py-2 font-black italic">
+                            <span className="text-xs mr-2">Son $</span>
+                            <span className="text-2xl">{pago.importe_total.toLocaleString('es-AR')}</span>
+                        </div>
+                        <div className="text-center w-64 pb-2">
+                            <div className="border-t border-black pt-2">
+                                <p className="text-[10px] font-black tracking-[0.2em]">Firma y Sello</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <style jsx global>{`
                 @media print {
-                    body * {
-                        visibility: hidden;
+                    @page {
+                        size: landscape;
+                        margin: 0;
                     }
-                    #print-section, #print-section * {
-                        visibility: visible;
-                    }
-                    #print-section {
-                        position: absolute;
-                        left: 0;
-                        top: 0;
-                        width: 100%;
+                    body {
+                        background: white;
                     }
                 }
             `}</style>
@@ -121,3 +144,4 @@ const ComprobantePago = forwardRef<HTMLDivElement, Props>(({ alumno, curso, pago
 ComprobantePago.displayName = 'ComprobantePago';
 
 export default ComprobantePago;
+

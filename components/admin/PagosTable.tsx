@@ -245,22 +245,28 @@ export default function PagosTable() {
                         </div>
                         <div ref={reciboRef}>
                             {(() => {
-                                const matricula = getPaymentStatus(printData, 'matricula');
-                                const seguro = getPaymentStatus(printData, 'seguro');
-                                const pagoFinal = seguro?.pagado ? seguro : (matricula?.pagado ? matricula : null);
+                                const pagosRealizados = printData.pagos?.filter((p: any) => p.pagado) || [];
 
-                                return pagoFinal ? (
+                                if (pagosRealizados.length === 0) return null;
+
+                                const importeTotal = pagosRealizados.reduce((acc: number, p: any) => acc + p.monto, 0);
+                                const conceptos = pagosRealizados.map((p: any) => ({
+                                    nombre: p.concepto.nombre,
+                                    monto: p.monto,
+                                    cantidad: 1 // Por defecto 1 si no se especifica en el modelo actual
+                                }));
+
+                                return (
                                     <ComprobantePago
+                                        id={pagosRealizados[0].nro_recibo}
                                         alumno={printData.alumno}
-                                        curso={printData.curso?.nombre}
                                         pago={{
-                                            concepto: pagoFinal.nombre,
-                                            monto: pagoFinal.monto,
-                                            fecha: pagoFinal.fecha,
-                                            observaciones: pagoFinal.obs
+                                            fecha: pagosRealizados[0].fecha_pago || new Date().toISOString(),
+                                            importe_total: importeTotal,
+                                            conceptos: conceptos
                                         }}
                                     />
-                                ) : null;
+                                );
                             })()}
                         </div>
                     </>

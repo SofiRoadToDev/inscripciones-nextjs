@@ -147,6 +147,7 @@ export async function getPagosAdmin(params: { search?: string; nivel?: string; p
                 pagado,
                 fecha_pago,
                 observaciones,
+                nro_recibo,
                 concepto:conceptos_pago(id, nombre)
             )
         `, { count: 'exact' });

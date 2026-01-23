@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 import {
     Users,
     CreditCard,
@@ -51,12 +52,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <div className="h-full flex flex-col">
                     <div className="p-8">
                         <div className="flex items-center gap-3">
-                            <div className="bg-primary-500 p-2 rounded-lg">
-                                <GraduationCap className="text-white w-6 h-6" />
+                            <div className="relative w-12 h-12">
+                                <Image
+                                    src="/images/escudo.png"
+                                    alt="Escudo Oficial"
+                                    fill
+                                    className="object-contain"
+                                />
                             </div>
                             <div>
-                                <h1 className="font-display text-xl text-primary-900 leading-none">San Patricio</h1>
-                                <p className="text-[10px] tracking-widest text-accent-600 uppercase font-bold mt-1">Admin Panel</p>
+                                <h1 className="font-display text-lg text-primary-900 leading-none font-bold">EET Nº 3107</h1>
+                                <p className="text-[9px] tracking-widest text-accent-600 uppercase font-black mt-1">Admin Panel</p>
                             </div>
                         </div>
                     </div>

@@ -18,15 +18,26 @@ export default function LoginPage() {
             </div>
 
             <div className="w-full flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-700">
-                <div className="text-center space-y-2">
-                    <h1 className="text-display font-display text-primary-900 text-4xl">Colegio San Patricio</h1>
-                    <p className="text-accent-600 tracking-widest uppercase text-sm text-4xl font-semibold">Sistema de Inscripciones</p>
+                <div className="flex flex-col items-center gap-4">
+                    <div className="relative w-24 h-24 mb-2">
+                        <Image
+                            src="/images/escudo.png"
+                            alt="Escudo Oficial"
+                            fill
+                            className="object-contain"
+                        />
+                    </div>
+                    <div className="text-center space-y-2">
+                        <h1 className="text-display font-display text-primary-900 text-3xl font-bold">EET Nº 3107</h1>
+                        <h2 className="text-xl font-medium text-primary-700">Juana Azurduy de Padilla</h2>
+                        <p className="text-accent-600 tracking-[0.2em] uppercase text-xs font-black pt-2">Sistema de Inscripciones</p>
+                    </div>
                 </div>
 
                 <LoginForm />
 
-                <p className="text-primary-500 text-sm">
-                    &copy; {new Date().getFullYear()} Colegio San Patricio. Todos los derechos reservados.
+                <p className="text-primary-500 text-xs font-medium uppercase tracking-wider">
+                    &copy; {new Date().getFullYear()} EET Nº 3107 - Juana Azurduy de Padilla
                 </p>
             </div>
         </main>

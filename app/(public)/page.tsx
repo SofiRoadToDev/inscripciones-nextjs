@@ -13,8 +13,8 @@ export default function HomePage() {
             <SideSection
                 id="nosotros"
                 subtitle="Institución"
-                title="Excelencia que inspira el mañana."
-                description="Con más de 75 años de trayectoria, el Colegio San Patricio combina la tradición pedagógica con las metodologías más innovadoras del siglo XXI. Nuestro compromiso es brindar una educación de vanguardia centrada en el desarrollo del ser."
+                title="Excelencia Técnica que inspira el mañana."
+                description="Como Escuela de Educación Técnica Nº 3107, combinamos la formación técnica profesional con las metodologías más innovadoras del siglo XXI. Nuestro compromiso es brindar una educación de vanguardia centrada en el desarrollo de capacidades tecnológicas y humanas."
                 image="/images/section-1.png"
             />
 

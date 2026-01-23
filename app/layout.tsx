@@ -16,8 +16,8 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Sistema de Inscripciones - Colegio San Patricio",
-  description: "Plataforma moderna de inscripciones para el Colegio San Patricio",
+  title: "Sistema de Inscripciones - EET Nº 3107 Juana Azurduy de Padilla",
+  description: "Plataforma moderna de inscripciones para la Escuela de Educación Técnica Nº 3107",
 };
 
 export default function RootLayout({

@@ -14,10 +14,13 @@ export default function Footer() {
                     {/* Contact & Branding */}
                     <div className="p-12 lg:p-20 space-y-12">
                         <div className="space-y-6">
-                            <h3 className="text-4xl font-display tracking-tight text-primary-950">Colegio San Patricio</h3>
+                            <h3 className="text-4xl font-display tracking-tight text-primary-950 leading-tight">
+                                EET Nº 3107 <br />
+                                <span className="text-2xl text-primary-700">Juana Azurduy de Padilla</span>
+                            </h3>
                             <p className="text-primary-600 max-w-md leading-relaxed font-medium">
-                                Formando ciudadanos íntegros, con excelencia académica y valores humanos desde 1945.
-                                Un espacio donde cada alumno encuentra su potencial.
+                                Formando técnicos íntegros, con excelencia académica y valores humanos.
+                                Un espacio donde cada alumno encuentra su potencial técnico y humano.
                             </p>
                         </div>
 
@@ -76,7 +79,7 @@ export default function Footer() {
 
                 {/* Bottom Bar */}
                 <div className="mt-20 pt-8 border-t border-primary-200 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] font-black uppercase tracking-widest text-primary-400">
-                    <p>© 2026 Colegio San Patricio. Todos los derechos reservados.</p>
+                    <p>© {new Date().getFullYear()} EET Nº 3107 - Juana Azurduy de Padilla. Todos los derechos reservados.</p>
                     <div className="flex gap-8">
                         <Link href="#" className="hover:text-primary-900 transition-colors">Privacidad</Link>
                         <Link href="#" className="hover:text-primary-900 transition-colors">Términos</Link>
