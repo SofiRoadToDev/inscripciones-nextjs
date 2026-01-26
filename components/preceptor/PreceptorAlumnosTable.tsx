@@ -19,10 +19,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { MoveHorizontal, Search, ShieldCheck, ShieldAlert, Pencil, Trash2 } from 'lucide-react';
+import { MoveHorizontal, Search, ShieldCheck, ShieldAlert, Pencil, Trash2, Eye, FileCheck, Accessibility, Loader2 } from 'lucide-react';
 import { MoverAlumnoModal } from './MoverAlumnoModal';
 import { EditarAlumnoModal } from './EditarAlumnoModal';
 import { EliminarAlumnoDialog } from './EliminarAlumnoDialog';
+import InscripcionDetalleModal from '@/components/admin/InscripcionDetalleModal';
+import { getInscripcionDetalle } from '@/lib/actions/admin.actions';
+import { toast } from 'sonner';
 
 interface Alumno {
     id: string; // ID de inscripción
@@ -33,6 +36,9 @@ interface Alumno {
     cursoId: string;
     cursoNombre: string;
     tieneSeguro: boolean;
+    tieneCud: boolean;
+    discapacidad: string | null;
+    documentacionCompleta: boolean;
 }
 
 interface PreceptorAlumnosTableProps {
@@ -44,12 +50,17 @@ export function PreceptorAlumnosTable({ alumnos, cursos }: PreceptorAlumnosTable
     const [searchTerm, setSearchTerm] = useState('');
     const [cursoFilter, setCursoFilter] = useState('all');
     const [seguroFilter, setSeguroFilter] = useState('all');
+    const [docFilter, setDocFilter] = useState('all');
+    const [saludFilter, setSaludFilter] = useState('all');
     const [selectedAlumno, setSelectedAlumno] = useState<Alumno | null>(null);
 
     // Estados para modales
     const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [detailData, setDetailData] = useState<any>(null);
+    const [isLoadingDetail, setIsLoadingDetail] = useState(false);
 
     const filteredAlumnos = alumnos.filter((a) => {
         const matchesSearch =
@@ -64,7 +75,17 @@ export function PreceptorAlumnosTable({ alumnos, cursos }: PreceptorAlumnosTable
             (seguroFilter === 'pago' && a.tieneSeguro) ||
             (seguroFilter === 'pendiente' && !a.tieneSeguro);
 
-        return matchesSearch && matchesCurso && matchesSeguro;
+        const matchesDoc =
+            docFilter === 'all' ||
+            (docFilter === 'completa' && a.documentacionCompleta) ||
+            (docFilter === 'pendiente' && !a.documentacionCompleta);
+
+        const matchesSalud =
+            saludFilter === 'all' ||
+            (saludFilter === 'cud' && a.tieneCud) ||
+            (saludFilter === 'discapacidad' && a.discapacidad && a.discapacidad.trim() !== '');
+
+        return matchesSearch && matchesCurso && matchesSeguro && matchesDoc && matchesSalud;
     });
 
     const handleMoveClick = (alumno: Alumno) => {
@@ -80,6 +101,20 @@ export function PreceptorAlumnosTable({ alumnos, cursos }: PreceptorAlumnosTable
     const handleDeleteClick = (alumno: Alumno) => {
         setSelectedAlumno(alumno);
         setIsDeleteModalOpen(true);
+    };
+
+    const handleViewDetail = async (id: string) => {
+        try {
+            setIsLoadingDetail(true);
+            const { data, error } = await getInscripcionDetalle(id);
+            if (error) throw new Error(error);
+            setDetailData(data);
+            setIsDetailModalOpen(true);
+        } catch (error: any) {
+            toast.error("Error al cargar el detalle: " + error.message);
+        } finally {
+            setIsLoadingDetail(false);
+        }
     };
 
     return (
@@ -109,13 +144,35 @@ export function PreceptorAlumnosTable({ alumnos, cursos }: PreceptorAlumnosTable
                     </SelectContent>
                 </Select>
                 <Select value={seguroFilter} onValueChange={setSeguroFilter}>
-                    <SelectTrigger className="w-full md:w-[200px]">
+                    <SelectTrigger className="w-full md:w-[180px]">
                         <SelectValue placeholder="Estado de Seguro" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">Todos los estados</SelectItem>
+                        <SelectItem value="all">Todos los seguros</SelectItem>
                         <SelectItem value="pago">Seguro Pagado</SelectItem>
                         <SelectItem value="pendiente">Seguro Pendiente</SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <Select value={docFilter} onValueChange={setDocFilter}>
+                    <SelectTrigger className="w-full md:w-[180px]">
+                        <SelectValue placeholder="Documentación" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Ver Documentación</SelectItem>
+                        <SelectItem value="completa">Completa</SelectItem>
+                        <SelectItem value="pendiente">Incompleta</SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <Select value={saludFilter} onValueChange={setSaludFilter}>
+                    <SelectTrigger className="w-full md:w-[180px]">
+                        <SelectValue placeholder="Salud/Inclusión" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Todas las condiciones</SelectItem>
+                        <SelectItem value="cud">Con CUD</SelectItem>
+                        <SelectItem value="discapacidad">Con Discapacidad</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
@@ -169,6 +226,16 @@ export function PreceptorAlumnosTable({ alumnos, cursos }: PreceptorAlumnosTable
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
+                                                className="text-neutral-600 hover:text-neutral-700 hover:bg-neutral-50 p-2"
+                                                title="Ver Detalle"
+                                                disabled={isLoadingDetail}
+                                                onClick={() => handleViewDetail(alumno.id)}
+                                            >
+                                                {isLoadingDetail ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="h-4 w-4" />}
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
                                                 className="text-primary-600 hover:text-primary-700 hover:bg-primary-50 gap-2"
                                                 onClick={() => handleMoveClick(alumno)}
                                             >
@@ -219,14 +286,17 @@ export function PreceptorAlumnosTable({ alumnos, cursos }: PreceptorAlumnosTable
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 alumno={selectedAlumno ? {
-                    inscripcionId: selectedAlumno.id, // OJO: En getAlumnosPreceptorAction, el 'id' retornado es el inscripción_id.
-                    // Verifiquemos en la acción: "id: ins.id" -> SÍ, es ID de inscripción. Correcto.
-                    // Pero para editar necesitamos ID de alumno?? getAlumnoDetalle espera alumnoId.
-                    // Ah, el objeto 'alumno' de la tabla NO TIENE el alumno_id expuesto directamente.
-                    // Tengo que ir a PreceptorAlumnosTable y arreglar la interfaz Alumno.
+                    inscripcionId: selectedAlumno.id,
                     nombre: selectedAlumno.nombre,
                     apellido: selectedAlumno.apellido
                 } : null}
+            />
+
+            <InscripcionDetalleModal
+                isOpen={isDetailModalOpen}
+                onClose={() => setIsDetailModalOpen(false)}
+                data={detailData}
+                onUpdateStatus={async () => { }} // Preceptor no actualiza estado desde aquí
             />
         </div >
     );

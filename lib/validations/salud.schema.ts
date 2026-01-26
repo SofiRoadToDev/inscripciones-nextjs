@@ -6,6 +6,7 @@ export const saludSchema = z.object({
     discapacidad: z.string().optional().or(z.literal('')),
     medicamentos: z.string().optional().or(z.literal('')),
     vacunacion_completa: z.boolean(),
+    certificado_salud: z.boolean().default(false),
     cud: z.boolean(),
     observaciones: z.string().optional().or(z.literal('')),
 })

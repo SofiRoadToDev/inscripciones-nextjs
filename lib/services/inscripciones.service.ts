@@ -102,6 +102,7 @@ export class InscripcionesService {
                     discapacidad: salud.discapacidad || null,
                     medicamentos: salud.medicamentos || null,
                     vacunacion_completa: salud.vacunacion_completa,
+                    certificado_salud: salud.certificado_salud || false,
                     cud: salud.cud || false,
                     observaciones: salud.observaciones || null
                 })
@@ -122,6 +123,8 @@ export class InscripcionesService {
                     repite: !!inscripcion.repite,
                     materias_pendientes: inscripcion.materias_pendientes || null,
                     escuela_procedencia: inscripcion.escuela_procedencia || null,
+                    documentacion_completa: inscripcion.documentacion_completa || false,
+                    observaciones: inscripcion.observaciones || null,
                     curso_id: null,
                     estado: 'pendiente'
                 })

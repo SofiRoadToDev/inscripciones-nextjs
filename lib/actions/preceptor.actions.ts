@@ -329,9 +329,12 @@ export async function getPreceptorStats() {
                 id,
                 curso_id,
                 cursos(nombre),
-                pagos:pagos_inscripcion(
-                    pagado,
-                    concepto:conceptos_pago(nombre)
+                pagos:pagos(
+                    id,
+                    detalles:detalles_pago(
+                        monto,
+                        concepto:conceptos_pago(nombre)
+                    )
                 )
             `)
             .in('curso_id', cursoIds)
@@ -355,9 +358,11 @@ export async function getPreceptorStats() {
             const cursoData = cursosMap.get(cursoId)!;
             cursoData.total++;
 
-            // Verificar si tiene el concepto de "Seguro" pagado
-            const tieneSeguro = ins.pagos?.some((p: any) =>
-                p.concepto?.nombre?.toLowerCase().includes('seguro') && p.pagado
+            // Verificar si tiene el concepto de "Seguro" pagado en alguno de sus recibos
+            const tieneSeguro = ins.pagos?.some((pago: any) =>
+                pago.detalles?.some((d: any) =>
+                    d.concepto?.nombre?.toLowerCase().includes('seguro')
+                )
             );
 
             if (tieneSeguro) {
@@ -415,6 +420,7 @@ export async function getAlumnosPreceptorAction() {
                 id,
                 curso_id,
                 estado,
+                documentacion_completa,
                 alumno:alumnos(
                     id,
                     nombre,
@@ -422,10 +428,17 @@ export async function getAlumnosPreceptorAction() {
                     dni
                 ),
                 curso:cursos(id, nombre),
-                pagos:pagos_inscripcion(
+                ficha_salud:fichas_salud(
+                    cud,
+                    discapacidad
+                ),
+                pagos:pagos(
                     id,
-                    pagado,
-                    concepto:conceptos_pago(nombre)
+                    detalles:detalles_pago(
+                        id,
+                        monto,
+                        concepto:conceptos_pago(nombre)
+                    )
                 )
             `)
             .in('curso_id', cursoIds)
@@ -447,7 +460,10 @@ export async function getAlumnosPreceptorAction() {
                 dni: ins.alumno?.dni || '-',
                 cursoId: ins.curso_id,
                 cursoNombre: ins.curso?.nombre || 'S/N',
-                tieneSeguro
+                tieneSeguro,
+                tieneCud: !!ins.ficha_salud?.cud,
+                discapacidad: ins.ficha_salud?.discapacidad || null,
+                documentacionCompleta: !!ins.documentacion_completa
             };
         }).sort((a, b) => a.apellido.localeCompare(b.apellido));
 

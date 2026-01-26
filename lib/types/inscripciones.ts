@@ -71,6 +71,7 @@ export interface FichaSalud {
     discapacidad?: string | null;
     medicamentos?: string | null;
     vacunacion_completa: boolean;
+    certificado_salud: boolean;
     observaciones?: string | null;
 }
 
@@ -79,6 +80,26 @@ export interface Curso {
     nombre: string;
     nivel_codigo: string;
     turno?: string;
+}
+
+export interface DetallePago {
+    id: string;
+    pago_id: string;
+    concepto_pago_id: string;
+    monto: number;
+    concepto?: {
+        nombre: string;
+    };
+}
+
+export interface Pago {
+    id: string;
+    inscripcion_id: string;
+    nro_recibo: number;
+    monto_total: number;
+    fecha_pago?: string | null;
+    observaciones?: string | null;
+    detalles?: DetallePago[];
 }
 
 export interface InscripcionCompleta {
@@ -101,4 +122,6 @@ export interface InscripcionCompleta {
     repite: boolean;
     materias_pendientes?: string | null;
     escuela_procedencia?: string | null;
+    documentacion_completa: boolean;
+    observaciones?: string | null;
 }

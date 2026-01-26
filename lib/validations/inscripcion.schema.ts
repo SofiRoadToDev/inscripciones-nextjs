@@ -6,6 +6,8 @@ export const inscripcionSchema = z.object({
     repite: z.boolean(),
     materias_pendientes: z.string().optional().or(z.literal('')),
     escuela_procedencia: z.string().optional().or(z.literal('')),
+    documentacion_completa: z.boolean().default(false),
+    observaciones: z.string().optional().or(z.literal('')),
 })
 
 export type InscripcionFormData = z.infer<typeof inscripcionSchema>
