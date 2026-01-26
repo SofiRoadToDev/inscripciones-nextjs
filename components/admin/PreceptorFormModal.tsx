@@ -48,6 +48,7 @@ interface Preceptor {
     nombre: string;
     apellido: string | null;
     dni: string | null;
+    email?: string;
     cursos: Array<{ id: string; curso: { id: string; nombre: string } }>;
 }
 
@@ -85,7 +86,7 @@ export function PreceptorFormModal({
                 nombre: preceptor.nombre,
                 apellido: preceptor.apellido || '',
                 dni: preceptor.dni || '',
-                email: '', // No mostramos el email en edición
+                email: preceptor.email || '',
                 password: '',
                 cursoIds: preceptor.cursos.map((c) => c.curso.id),
             });
@@ -113,7 +114,9 @@ export function PreceptorFormModal({
                         cursoIds: data.cursoIds,
                         nombre: data.nombre,
                         apellido: data.apellido,
-                        dni: data.dni
+                        dni: data.dni,
+                        email: data.email,
+                        password: data.password || undefined,
                     }
                 );
 
@@ -216,37 +219,33 @@ export function PreceptorFormModal({
                             )}
                         />
 
-                        {!isEditing && (
-                            <>
-                                <FormField
-                                    control={form.control}
-                                    name="email"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Email</FormLabel>
-                                            <FormControl>
-                                                <Input type="email" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                        <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Email</FormLabel>
+                                    <FormControl>
+                                        <Input type="email" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
-                                <FormField
-                                    control={form.control}
-                                    name="password"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Contraseña</FormLabel>
-                                            <FormControl>
-                                                <Input type="password" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </>
-                        )}
+                        <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>{isEditing ? 'Nueva Contraseña (opcional)' : 'Contraseña'}</FormLabel>
+                                    <FormControl>
+                                        <Input type="password" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
                         <FormField
                             control={form.control}

@@ -61,7 +61,7 @@ export async function crearPreceptorAction(params: {
             }));
 
             const { error: cursosError } = await (adminClient
-                .from('preceptor_cursos') as any)
+                .from('preceptor_cursos' as any) as any)
                 .insert(asignaciones);
 
             if (cursosError) {
@@ -85,18 +85,41 @@ export async function crearPreceptorAction(params: {
 export async function actualizarPreceptorAction(
     preceptorId: string,
     data: {
-        cursoIds: string[];
         nombre: string;
         apellido: string;
         dni: string;
+        cursoIds: string[];
+        email?: string;
+        password?: string;
     }
 ) {
     try {
         await requireRole('admin');
-
         const adminClient = createAdminClient();
 
-        // 1. Actualizar datos del perfil
+        // 0. Obtener el perfil para tener el user_id
+        const { data: profile } = await adminClient
+            .from('perfiles')
+            .select('user_id')
+            .eq('id', preceptorId)
+            .single();
+
+        if (!profile) return { error: 'Perfil no encontrado' };
+
+        // 1. Actualizar email/password en Auth si se proporcionan
+        const authUpdates: any = {};
+        if (data.email) authUpdates.email = data.email;
+        if (data.password) authUpdates.password = data.password;
+
+        if (Object.keys(authUpdates).length > 0) {
+            const { error: authError } = await adminClient.auth.admin.updateUserById(
+                profile.user_id,
+                authUpdates
+            );
+            if (authError) return { error: 'Error al actualizar credenciales: ' + authError.message };
+        }
+
+        // 2. Actualizar Perfil
         const { error: perfilError } = await adminClient
             .from('perfiles')
             .update({
@@ -110,13 +133,13 @@ export async function actualizarPreceptorAction(
             return { error: 'Error al actualizar perfil: ' + perfilError.message };
         }
 
-        // 2. Eliminar asignaciones actuales
+        // 3. Eliminar asignaciones actuales
         await (adminClient
-            .from('preceptor_cursos') as any)
+            .from('preceptor_cursos' as any) as any)
             .delete()
             .eq('preceptor_id', preceptorId);
 
-        // 3. Insertar nuevas asignaciones
+        // 4. Insertar nuevas asignaciones
         if (data.cursoIds.length > 0) {
             const asignaciones = data.cursoIds.map((cursoId) => ({
                 preceptor_id: preceptorId,
@@ -124,7 +147,7 @@ export async function actualizarPreceptorAction(
             }));
 
             const { error } = await (adminClient
-                .from('preceptor_cursos') as any)
+                .from('preceptor_cursos' as any) as any)
                 .insert(asignaciones);
 
             if (error) {
@@ -161,7 +184,7 @@ export async function eliminarPreceptorAction(preceptorId: string) {
 
         // 2. Eliminar asignaciones de cursos
         await (adminClient
-            .from('preceptor_cursos') as any)
+            .from('preceptor_cursos' as any) as any)
             .delete()
             .eq('preceptor_id', preceptorId);
 
@@ -198,10 +221,9 @@ export async function getPreceptoresAction() {
     try {
         await requireRole('admin');
 
-        const cookieStore = await cookies();
-        const supabase = createClient(cookieStore);
+        const adminClient = createAdminClient();
 
-        const result = await (supabase
+        const result = await (adminClient
             .from('perfiles') as any)
             .select(`
                 id,
@@ -219,13 +241,28 @@ export async function getPreceptoresAction() {
             .eq('role', 'preceptor')
             .order('apellido', { ascending: true });
 
-        const { data, error } = result;
+        const { data: perfiles, error } = result;
 
         if (error) {
             return { error: error.message };
         }
 
-        return { data };
+        // Obtener emails de auth.users
+        const { data: { users }, error: usersError } = await adminClient.auth.admin.listUsers();
+
+        if (usersError) {
+            console.error("Error listing users:", usersError);
+        }
+
+        const dataWithEmail = (perfiles || []).map((p: any) => {
+            const authUser = users?.find(u => u.id === p.user_id);
+            return {
+                ...p,
+                email: authUser?.email || 'S/E'
+            };
+        });
+
+        return { data: dataWithEmail };
     } catch (error: any) {
         return { error: error.message };
     }
@@ -310,7 +347,7 @@ export async function getPreceptorStats(cicloLectivo: string = new Date().getFul
             .select('curso_id')
             .eq('preceptor_id', profile.id);
 
-        const cursoIds = asignaciones?.map((a) => a.curso_id) || [];
+        const cursoIds = (asignaciones || []).map((a: any) => a.curso_id);
 
         if (cursoIds.length === 0) {
             return {
@@ -420,11 +457,11 @@ export async function getAlumnosPreceptorAction(params: {
             `)
             .eq('preceptor_id', profile.id);
 
-        const cursoIds = asignaciones?.map((a) => a.curso_id) || [];
-        const misCursos = asignaciones?.map((a: any) => ({
+        const cursoIds = (asignaciones || []).map((a: any) => a.curso_id);
+        const misCursos = (asignaciones || []).map((a: any) => ({
             id: a.curso.id,
             nombre: a.curso.nombre
-        })) || [];
+        }));
 
         if (cursoIds.length === 0) {
             return { data: [], misCursos: [] };

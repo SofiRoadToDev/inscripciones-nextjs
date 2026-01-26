@@ -29,6 +29,7 @@ interface Preceptor {
     nombre: string;
     apellido: string | null;
     dni: string | null;
+    email: string;
     user_id: string;
     cursos: Curso[];
 }
@@ -85,6 +86,7 @@ export function PreceptoresTable({ preceptores, cursos }: PreceptoresTableProps)
                             <TableHead>Apellido</TableHead>
                             <TableHead>Nombre</TableHead>
                             <TableHead>DNI</TableHead>
+                            <TableHead>Email</TableHead>
                             <TableHead>Cursos Asignados</TableHead>
                             <TableHead className="text-right">Acciones</TableHead>
                         </TableRow>
@@ -102,6 +104,7 @@ export function PreceptoresTable({ preceptores, cursos }: PreceptoresTableProps)
                                     <TableCell className="font-medium">{preceptor.apellido || '-'}</TableCell>
                                     <TableCell className="font-medium">{preceptor.nombre}</TableCell>
                                     <TableCell>{preceptor.dni || '-'}</TableCell>
+                                    <TableCell className="text-sm text-muted-foreground">{preceptor.email}</TableCell>
                                     <TableCell>
                                         <div className="flex flex-wrap gap-1">
                                             {preceptor.cursos.length === 0 ? (

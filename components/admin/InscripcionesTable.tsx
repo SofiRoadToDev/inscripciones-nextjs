@@ -87,13 +87,17 @@ const STATUS_COLORS: Record<string, string> = {
     rechazada: 'bg-rose-100 text-rose-700 border-rose-200',
 };
 
+import { useSearchParams } from 'next/navigation';
+
 export default function InscripcionesTable() {
+    const searchParams = useSearchParams();
     const [data, setData] = useState<any[]>([]);
     const [count, setCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [estado, setEstado] = useState('todos');
     const [page, setPage] = useState(1);
+    const ciclo = searchParams.get('ciclo') || new Date().getFullYear().toString();
 
     // Modal State
     const [selectedInscripcion, setSelectedInscripcion] = useState<any | null>(null);
@@ -107,7 +111,7 @@ export default function InscripcionesTable() {
 
     const fetchData = async () => {
         setLoading(true);
-        const result = await getInscripcionesAdmin({ search, estado, page });
+        const result = await getInscripcionesAdmin({ search, estado, page, ciclo });
         if (result.data) {
             setData(result.data);
             setCount(result.count || 0);
@@ -117,7 +121,7 @@ export default function InscripcionesTable() {
 
     useEffect(() => {
         fetchData();
-    }, [search, estado, page]);
+    }, [search, estado, page, ciclo]);
 
     const handleOpenDetail = async (id: string, reject: boolean = false) => {
         setIsDetailLoading(true);

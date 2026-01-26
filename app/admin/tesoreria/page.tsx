@@ -1,9 +1,14 @@
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 import PagosTable from '@/components/admin/PagosTable';
-import { CreditCard, Wallet, TrendingUp, Users } from 'lucide-react';
+import { CreditCard, Wallet, TrendingUp, Users, Calendar } from 'lucide-react';
+import { CicloLectivoSelector } from '@/components/preceptor/CicloLectivoSelector';
 
-export default async function TesoreriaPage() {
+export default async function TesoreriaPage(props: { searchParams: Promise<{ ciclo?: string }> }) {
+    const searchParams = await props.searchParams;
+    const defaultYear = new Date().getFullYear().toString();
+    const ciclo = searchParams.ciclo || defaultYear;
+
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
@@ -11,23 +16,29 @@ export default async function TesoreriaPage() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    // Stats: Recaudación diaria (filtrada por ciclo de la inscripción)
     const { data: dailyStats } = await supabase
-        .from('pagos_inscripcion')
-        .select('monto')
-        .gte('fecha_pago', today.toISOString());
+        .from('pagos')
+        .select('monto_total, inscripciones!inner(ciclo_lectivo)')
+        .eq('inscripciones.ciclo_lectivo', ciclo)
+        .gte('created_at', today.toISOString());
 
-    const totalRecaudadoHoy = dailyStats?.reduce((acc, curr) => acc + Number(curr.monto), 0) || 0;
+    const totalRecaudadoHoy = (dailyStats as any[] | null)?.reduce((acc: number, curr: any) => acc + Number(curr.monto_total), 0) || 0;
 
     const { count: totalPagos } = await supabase
-        .from('pagos_inscripcion')
-        .select('*', { count: 'exact', head: true });
+        .from('pagos')
+        .select('*, inscripciones!inner(ciclo_lectivo)', { count: 'exact', head: true })
+        .eq('inscripciones.ciclo_lectivo', ciclo);
 
     return (
         <div className="space-y-10 pb-10">
             {/* Header */}
-            <div>
-                <h1 className="text-4xl font-display text-primary-900 tracking-tight">Tesorería y Caja</h1>
-                <p className="text-primary-500 mt-2 font-medium">Gestión de cobros de matrículas y seguros escolares.</p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-4xl font-display text-primary-900 tracking-tight">Tesorería y Caja</h1>
+                    <p className="text-primary-500 mt-2 font-medium">Gestión de cobros de matrículas y seguros escolares.</p>
+                </div>
+                <CicloLectivoSelector defaultValue={defaultYear} />
             </div>
 
             {/* Quick Stats */}

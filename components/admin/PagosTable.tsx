@@ -14,7 +14,10 @@ import { useRef } from 'react';
 import FichaInscripcion from './FichaInscripcion';
 import ComprobantePago from './ComprobantePago';
 
+import { useSearchParams } from 'next/navigation';
+
 export default function PagosTable() {
+    const searchParams = useSearchParams();
     const [data, setData] = useState<any[]>([]);
     const [conceptos, setConceptos] = useState<any[]>([]);
     const [count, setCount] = useState(0);
@@ -22,6 +25,7 @@ export default function PagosTable() {
     const [search, setSearch] = useState('');
     const [nivel, setNivel] = useState('todos');
     const [page, setPage] = useState(1);
+    const ciclo = searchParams.get('ciclo') || new Date().getFullYear().toString();
 
     // Modal State
     const [selectedInscripcion, setSelectedInscripcion] = useState<any | null>(null);
@@ -35,7 +39,7 @@ export default function PagosTable() {
     const fetchData = async () => {
         setLoading(true);
         const [pagosRes, conceptosRes] = await Promise.all([
-            getPagosAdmin({ search, nivel, page }),
+            getPagosAdmin({ search, nivel, page, ciclo }),
             getConceptosPago()
         ]);
 
@@ -49,7 +53,7 @@ export default function PagosTable() {
 
     useEffect(() => {
         fetchData();
-    }, [search, nivel, page]);
+    }, [search, nivel, page, ciclo]);
 
     const handlePrint = (type: 'ficha' | 'recibo', item: any) => {
         setPrintData(item);

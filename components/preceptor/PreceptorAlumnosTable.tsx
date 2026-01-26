@@ -278,6 +278,31 @@ export function PreceptorAlumnosTable({ alumnos, cursos, total, currentPage, pag
                         )}
                     </TableBody>
                 </Table>
+
+                {/* Pagination Controls inside table container */}
+                <div className="px-6 py-4 bg-white border-t border-primary-50 flex items-center justify-between">
+                    <p className="text-sm text-primary-500 font-medium">
+                        Mostrando <span className="text-primary-900">{alumnos.length}</span> de <span className="text-primary-900">{total}</span> alumnos
+                    </p>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline" size="sm"
+                            disabled={currentPage === 1}
+                            onClick={() => updateFilters({ page: currentPage - 1 })}
+                            className="border-primary-100"
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                        </Button>
+                        <Button
+                            variant="outline" size="sm"
+                            disabled={currentPage * pageSize >= total}
+                            onClick={() => updateFilters({ page: currentPage + 1 })}
+                            className="border-primary-100"
+                        >
+                            <ChevronRight className="w-4 h-4" />
+                        </Button>
+                    </div>
+                </div>
             </div>
 
             <MoverAlumnoModal
@@ -310,30 +335,6 @@ export function PreceptorAlumnosTable({ alumnos, cursos, total, currentPage, pag
                 onUpdateStatus={async () => { }} // Preceptor no actualiza estado desde aquí
             />
 
-            {/* Pagination Controls */}
-            <div className="px-6 py-4 bg-white border border-primary-100 rounded-2xl flex items-center justify-between shadow-sm mt-4">
-                <p className="text-sm text-primary-500 font-medium">
-                    Mostrando <span className="text-primary-900">{alumnos.length}</span> de <span className="text-primary-900">{total}</span> alumnos
-                </p>
-                <div className="flex gap-2">
-                    <Button
-                        variant="outline" size="sm"
-                        disabled={currentPage === 1}
-                        onClick={() => updateFilters({ page: currentPage - 1 })}
-                        className="border-primary-100"
-                    >
-                        <ChevronLeft className="w-4 h-4" />
-                    </Button>
-                    <Button
-                        variant="outline" size="sm"
-                        disabled={currentPage * pageSize >= total}
-                        onClick={() => updateFilters({ page: currentPage + 1 })}
-                        className="border-primary-100"
-                    >
-                        <ChevronRight className="w-4 h-4" />
-                    </Button>
-                </div>
-            </div>
         </div >
     );
 }

@@ -9,11 +9,13 @@ export async function getInscripcionesAdmin(params: {
     estado?: string;
     nivel?: string;
     page?: number;
+    ciclo?: string;
 }) {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
     const pageSize = 10;
     const start = ((params.page || 1) - 1) * pageSize;
+    const cicloLectivo = params.ciclo || new Date().getFullYear().toString();
 
     let query = supabase
         .from('inscripciones')
@@ -23,7 +25,8 @@ export async function getInscripcionesAdmin(params: {
       curso:cursos(id, nombre),
       nivel:niveles(codigo, nivel),
       ficha_salud:fichas_salud(id, discapacidad, cud)
-    `, { count: 'exact' });
+    `, { count: 'exact' })
+        .eq('ciclo_lectivo', cicloLectivo);
 
     // Filtros
     if (params.estado && params.estado !== 'todos') {
@@ -128,11 +131,12 @@ export async function getCursos() {
     return { data };
 }
 
-export async function getPagosAdmin(params: { search?: string; nivel?: string; page?: number }) {
+export async function getPagosAdmin(params: { search?: string; nivel?: string; page?: number; ciclo?: string }) {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
     const pageSize = 10;
     const start = ((params.page || 1) - 1) * pageSize;
+    const cicloLectivo = params.ciclo || new Date().getFullYear().toString();
 
     let query = supabase
         .from('inscripciones')
@@ -162,7 +166,8 @@ export async function getPagosAdmin(params: { search?: string; nivel?: string; p
                 )
             )
         `, { count: 'exact' })
-        .eq('estado', 'aprobada');
+        .eq('estado', 'aprobada')
+        .eq('ciclo_lectivo', cicloLectivo);
 
     if (params.nivel && params.nivel !== 'todos') {
         query = query.eq('nivel_codigo', params.nivel);

@@ -3,8 +3,13 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import InscripcionesTable from '@/components/admin/InscripcionesTable';
 import { Users, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { CicloLectivoSelector } from '@/components/preceptor/CicloLectivoSelector';
 
-export default async function AdminDashboard() {
+export default async function AdminDashboard(props: { searchParams: Promise<{ ciclo?: string }> }) {
+    const searchParams = await props.searchParams;
+    const defaultYear = new Date().getFullYear().toString();
+    const ciclo = searchParams.ciclo || defaultYear;
+
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
@@ -14,10 +19,10 @@ export default async function AdminDashboard() {
         redirect('/admin/login');
     }
 
-    // Fetch quick stats
-    const { count: total } = await supabase.from('inscripciones').select('*', { count: 'exact', head: true });
-    const { count: pendientes } = await supabase.from('inscripciones').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente');
-    const { count: aprobadas } = await supabase.from('inscripciones').select('*', { count: 'exact', head: true }).eq('estado', 'aprobada');
+    // Fetch quick stats filtered by cycle
+    const { count: total } = await supabase.from('inscripciones').select('*', { count: 'exact', head: true }).eq('ciclo_lectivo', ciclo);
+    const { count: pendientes } = await supabase.from('inscripciones').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente').eq('ciclo_lectivo', ciclo);
+    const { count: aprobadas } = await supabase.from('inscripciones').select('*', { count: 'exact', head: true }).eq('estado', 'aprobada').eq('ciclo_lectivo', ciclo);
 
     const stats = [
         { name: 'Total Solicitudes', value: total || 0, icon: Users, color: 'text-primary-600', bg: 'bg-primary-50' },
@@ -27,9 +32,12 @@ export default async function AdminDashboard() {
 
     return (
         <div className="space-y-10">
-            <header className="flex flex-col gap-1">
-                <h1 className="text-display font-display text-primary-900 text-4xl leading-tight">Gestión de Inscripciones</h1>
-                <p className="text-primary-600">Supervise y gestione las solicitudes de ingreso al ciclo lectivo.</p>
+            <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-display font-display text-primary-900 text-4xl leading-tight">Gestión de Inscripciones</h1>
+                    <p className="text-primary-600">Supervise y gestione las solicitudes de ingreso al ciclo lectivo.</p>
+                </div>
+                <CicloLectivoSelector defaultValue={defaultYear} />
             </header>
 
             {/* Stats Grid */}
