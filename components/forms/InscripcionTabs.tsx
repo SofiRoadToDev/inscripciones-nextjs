@@ -79,7 +79,7 @@ export default function InscripcionTabs() {
         <div className="w-full max-w-4xl mx-auto py-18">
             <div className="mb-12">
                 <h1 className="font-display text-display text-primary-900 text-4xl mb-4">
-                    Formulario de Inscripción
+                    Formulario de Preinscripción
                 </h1>
                 <p className="text-lg text-neutral-800">
                     Siga los pasos para formalizar la inscripción del ciclo lectivo {new Date().getFullYear()}

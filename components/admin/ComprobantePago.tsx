@@ -83,7 +83,7 @@ const ComprobantePago = forwardRef<HTMLDivElement, Props>(({ id, alumno, pago },
 
                     <div className="text-right mb-8">
                         <p className="font-bold">
-                            Salta, {safeFormat(pago.fecha, "d 'de' MMMM 'de' yyyy", { locale: es })}
+                            Salta, {safeFormat(pago.fecha, "dd/MM/yyyy", { locale: es })}
                         </p>
                     </div>
 

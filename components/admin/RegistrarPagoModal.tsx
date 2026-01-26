@@ -91,7 +91,8 @@ export default function RegistrarPagoModal({ isOpen, onClose, inscripcion, conce
                 })),
                 montoTotal: montoTotal,
                 fecha: new Date(fecha).toISOString(),
-                observaciones
+                observaciones,
+                nroRecibo: result.nroRecibo
             });
             onSuccess();
         } else {
@@ -136,6 +137,7 @@ export default function RegistrarPagoModal({ isOpen, onClose, inscripcion, conce
                         <div className="hidden">
                             <div ref={printRef} id="print-section">
                                 <ComprobantePago
+                                    id={ultimoPago.nroRecibo}
                                     alumno={inscripcion.alumno}
                                     pago={{
                                         fecha: ultimoPago.fecha,

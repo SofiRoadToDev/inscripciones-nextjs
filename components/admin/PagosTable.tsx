@@ -79,16 +79,19 @@ export default function PagosTable() {
     };
 
     const getPaymentStatus = (inscripcion: any, tipo: 'matricula' | 'seguro') => {
-        const pagos = inscripcion.pagos || [];
+        const pagosHead = inscripcion.pagos || [];
+        // Extract all details from all payments
+        const allDetails = pagosHead.flatMap((p: any) => p.detalles || []);
+
         if (tipo === 'matricula') {
-            const p = pagos.find((p: any) =>
-                p.concepto.nombre.toLowerCase().includes('matrícula') ||
-                p.concepto.nombre.toLowerCase().includes('matricula')
+            const d = allDetails.find((d: any) =>
+                d.concepto.nombre.toLowerCase().includes('matrícula') ||
+                d.concepto.nombre.toLowerCase().includes('matricula')
             );
-            return p ? { pagado: p.pagado, monto: p.monto, nombre: p.concepto.nombre, fecha: p.fecha_pago, obs: p.observaciones } : null;
+            return d ? { pagado: true, monto: d.monto, nombre: d.concepto.nombre } : null;
         } else {
-            const p = pagos.find((p: any) => p.concepto.nombre.toLowerCase().includes('seguro'));
-            return p ? { pagado: p.pagado, monto: p.monto, nombre: p.concepto.nombre, fecha: p.fecha_pago, obs: p.observaciones } : null;
+            const d = allDetails.find((d: any) => d.concepto.nombre.toLowerCase().includes('seguro'));
+            return d ? { pagado: true, monto: d.monto, nombre: d.concepto.nombre } : null;
         }
     };
 
@@ -98,7 +101,7 @@ export default function PagosTable() {
                 <div className="relative w-full sm:max-w-md">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-400 w-4 h-4" />
                     <Input
-                        placeholder="Buscar por DNI o Nombre..."
+                        placeholder="Buscar por DNI, Nombre o Nº Recibo..."
                         className="pl-10 border-primary-100"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -125,6 +128,7 @@ export default function PagosTable() {
                             <tr className="bg-primary-50/50 border-b border-primary-100 text-[10px] font-black uppercase tracking-widest text-primary-400">
                                 <th className="px-6 py-4">Alumno</th>
                                 <th className="px-6 py-4">Curso</th>
+                                <th className="px-6 py-4">Comprobante</th>
                                 <th className="px-6 py-4">Matrícula</th>
                                 <th className="px-6 py-4">Seguro</th>
                                 <th className="px-6 py-4 text-right">Acciones</th>
@@ -134,14 +138,14 @@ export default function PagosTable() {
                             {loading ? (
                                 Array.from({ length: 5 }).map((_, i) => (
                                     <tr key={i} className="animate-pulse">
-                                        <td colSpan={5} className="px-6 py-8"><div className="h-4 bg-primary-50 rounded" /></td>
+                                        <td colSpan={6} className="px-6 py-8"><div className="h-4 bg-primary-50 rounded" /></td>
                                     </tr>
                                 ))
                             ) : (
                                 data.map((item) => {
                                     const matricula = getPaymentStatus(item, 'matricula');
                                     const seguro = getPaymentStatus(item, 'seguro');
-                                    const tienePagos = (matricula?.pagado || seguro?.pagado);
+                                    const tienePagos = (item.pagos && item.pagos.length > 0);
 
                                     return (
                                         <tr key={item.id} className="hover:bg-primary-50/30 transition-colors">
@@ -151,6 +155,13 @@ export default function PagosTable() {
                                             </td>
                                             <td className="px-6 py-5 text-sm text-primary-600">
                                                 {item.curso?.nombre || 'S/A'}
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                {item.pagos?.map((p: any) => (
+                                                    <div key={p.id} className="text-[10px] font-mono font-bold text-primary-600 bg-primary-50 px-2 py-0.5 rounded border border-primary-100 mb-1 w-fit">
+                                                        SI-{String(p.nro_recibo).padStart(8, '0')}
+                                                    </div>
+                                                ))}
                                             </td>
                                             <td className="px-6 py-5">
                                                 {matricula?.pagado ? (
@@ -245,25 +256,25 @@ export default function PagosTable() {
                         </div>
                         <div ref={reciboRef}>
                             {(() => {
-                                const pagosRealizados = printData.pagos?.filter((p: any) => p.pagado) || [];
+                                // For simplicity in this table view, we print the LAST payment made
+                                const lastPago = printData.pagos && printData.pagos.length > 0
+                                    ? printData.pagos[0] // Since they are ordered by date in action
+                                    : null;
 
-                                if (pagosRealizados.length === 0) return null;
-
-                                const importeTotal = pagosRealizados.reduce((acc: number, p: any) => acc + p.monto, 0);
-                                const conceptos = pagosRealizados.map((p: any) => ({
-                                    nombre: p.concepto.nombre,
-                                    monto: p.monto,
-                                    cantidad: 1 // Por defecto 1 si no se especifica en el modelo actual
-                                }));
+                                if (!lastPago) return null;
 
                                 return (
                                     <ComprobantePago
-                                        id={pagosRealizados[0].nro_recibo}
+                                        id={lastPago.nro_recibo}
                                         alumno={printData.alumno}
                                         pago={{
-                                            fecha: pagosRealizados[0].fecha_pago || new Date().toISOString(),
-                                            importe_total: importeTotal,
-                                            conceptos: conceptos
+                                            fecha: lastPago.fecha_pago || new Date().toISOString(),
+                                            importe_total: lastPago.monto_total,
+                                            conceptos: lastPago.detalles.map((d: any) => ({
+                                                nombre: d.concepto.nombre,
+                                                monto: d.monto,
+                                                cantidad: 1
+                                            }))
                                         }}
                                     />
                                 );

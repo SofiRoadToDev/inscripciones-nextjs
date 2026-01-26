@@ -30,9 +30,16 @@ export async function getInscripcionesAdmin(params: {
     }
 
     if (params.search) {
-        // Nota: Para búsqueda por nombre/apellido/dni combinados en Supabase/Postgres
-        // se suele usar or() o una vista. Aquí usaremos or() básico en el alumno.
-        query = query.or(`dni.ilike.%${params.search}%,nombre.ilike.%${params.search}%,apellido.ilike.%${params.search}%`, { foreignTable: 'alumnos' });
+        const isNumeric = !isNaN(Number(params.search)) && params.search.trim() !== '';
+
+        if (isNumeric) {
+            // Search in alumno fields OR in pagos for the receipt number
+            // Note: prefixes MUST match the aliases used in the .select()
+            query = query.or(`alumno.dni.ilike.%${params.search}%,alumno.nombre.ilike.%${params.search}%,alumno.apellido.ilike.%${params.search}%,pagos.nro_recibo.eq.${params.search}`);
+        } else {
+            // Search only in alumno fields
+            query = query.or(`alumno.dni.ilike.%${params.search}%,alumno.nombre.ilike.%${params.search}%,alumno.apellido.ilike.%${params.search}%`);
+        }
     }
 
     const { data, count, error } = await query
@@ -141,14 +148,17 @@ export async function getPagosAdmin(params: { search?: string; nivel?: string; p
                 vinculo,
                 tutor:tutores(*, domicilio:domicilios(*, provincia:provincias(nombre), departamento:departamentos(nombre), localidad:localidades(nombre)))
             ),
-            pagos:pagos_inscripcion(
+            pagos:pagos(
                 id,
-                monto,
-                pagado,
+                monto_total,
+                nro_recibo,
                 fecha_pago,
                 observaciones,
-                nro_recibo,
-                concepto:conceptos_pago(id, nombre)
+                detalles:detalles_pago(
+                    id,
+                    monto,
+                    concepto:conceptos_pago(id, nombre)
+                )
             )
         `, { count: 'exact' })
         .eq('estado', 'aprobada');
@@ -158,7 +168,14 @@ export async function getPagosAdmin(params: { search?: string; nivel?: string; p
     }
 
     if (params.search) {
-        query = query.or(`dni.ilike.%${params.search}%,nombre.ilike.%${params.search}%,apellido.ilike.%${params.search}%`, { foreignTable: 'alumnos' });
+        const isNumeric = !isNaN(Number(params.search)) && params.search.trim() !== '';
+
+        if (isNumeric) {
+            // Search in alumno fields OR in pagos for the receipt number
+            query = query.or(`alumno.dni.ilike.%${params.search}%,alumno.nombre.ilike.%${params.search}%,alumno.apellido.ilike.%${params.search}%,pagos.nro_recibo.eq.${params.search}`);
+        } else {
+            query = query.or(`alumno.dni.ilike.%${params.search}%,alumno.nombre.ilike.%${params.search}%,alumno.apellido.ilike.%${params.search}%`);
+        }
     }
 
     const { data, count, error } = await query
@@ -186,43 +203,38 @@ export async function registrarPago(params: {
     const supabase = createClient(cookieStore);
     const { data: { user } } = await supabase.auth.getUser();
 
-    for (const pago of params.pagos) {
-        // Check if exists for this specific concepto
-        const { data: existing } = await supabase
-            .from('pagos_inscripcion')
-            .select('id')
-            .eq('inscripcion_id', params.inscripcionId)
-            .eq('concepto_pago_id', pago.conceptoId)
-            .single();
+    const montoTotal = params.pagos.reduce((acc, p) => acc + p.monto, 0);
 
-        if (existing) {
-            await supabase
-                .from('pagos_inscripcion')
-                .update({
-                    monto: pago.monto,
-                    pagado: true,
-                    fecha_pago: params.fechaPago || new Date().toISOString(),
-                    observaciones: params.observaciones,
-                    user_id: user?.id
-                })
-                .eq('id', existing.id);
-        } else {
-            await supabase
-                .from('pagos_inscripcion')
-                .insert({
-                    inscripcion_id: params.inscripcionId,
-                    concepto_pago_id: pago.conceptoId,
-                    monto: pago.monto,
-                    pagado: true,
-                    fecha_pago: params.fechaPago || new Date().toISOString(),
-                    observaciones: params.observaciones,
-                    user_id: user?.id
-                });
-        }
-    }
+    // 1. Crear la cabecera del Pago
+    const { data: pago, error: pagoError } = await supabase
+        .from('pagos')
+        .insert({
+            inscripcion_id: params.inscripcionId,
+            monto_total: montoTotal,
+            fecha_pago: params.fechaPago || new Date().toISOString(),
+            observaciones: params.observaciones,
+            user_id: user?.id
+        })
+        .select()
+        .single();
+
+    if (pagoError || !pago) return { error: pagoError?.message || 'Error al crear cabecera de pago' };
+
+    // 2. Crear los detalles de Pago
+    const detallesData = params.pagos.map(item => ({
+        pago_id: pago.id,
+        concepto_pago_id: item.conceptoId,
+        monto: item.monto
+    }));
+
+    const { error: detallesError } = await supabase
+        .from('detalles_pago')
+        .insert(detallesData);
+
+    if (detallesError) return { error: detallesError.message };
 
     revalidatePath('/admin/tesoreria');
-    return { success: true };
+    return { success: true, pagoId: pago.id, nroRecibo: pago.nro_recibo };
 }
 
 export async function getConceptosPago() {
@@ -352,11 +364,13 @@ export async function getReporteSeguros(cursoId?: string) {
             estado,
             alumno:alumnos(id, nombre, apellido, dni),
             curso:cursos(id, nombre),
-            pagos:pagos_inscripcion(
+            pagos:pagos(
                 id,
-                pagado,
-                monto,
-                concepto:conceptos_pago(nombre)
+                monto_total,
+                detalles:detalles_pago(
+                    monto,
+                    concepto:conceptos_pago(nombre)
+                )
             )
         `)
         .eq('estado', 'aprobada');
@@ -371,8 +385,9 @@ export async function getReporteSeguros(cursoId?: string) {
 
     // Process data to see who paid insurance (any concept containing "seguro")
     const reporte = data.map((ins: any) => {
-        const pagoSeguro = ins.pagos?.find((p: any) =>
-            p.concepto.nombre.toLowerCase().includes('seguro') && p.pagado
+        const allDetails = ins.pagos?.flatMap((p: any) => p.detalles || []) || [];
+        const pagoSeguro = allDetails.find((d: any) =>
+            d.concepto.nombre.toLowerCase().includes('seguro')
         );
 
         return {
@@ -442,8 +457,8 @@ export async function eliminarAlumnosCurso(cursoId: string) {
     if (inscripciones && inscripciones.length > 0) {
         const ids = inscripciones.map(i => i.id);
 
-        // delete pagos
-        await supabase.from('pagos_inscripcion').delete().in('inscripcion_id', ids);
+        // delete pagos (header + detail via cascade)
+        await supabase.from('pagos').delete().in('inscripcion_id', ids);
 
         // delete tutores (many-to-many link)
         await supabase.from('inscripciones_tutores').delete().in('inscripcion_id', ids);
@@ -456,5 +471,25 @@ export async function eliminarAlumnosCurso(cursoId: string) {
 
     if (error) return { error: error.message };
     revalidatePath('/admin/config');
+    return { success: true };
+}
+
+export async function eliminarInscripcion(id: string, deletePayments: boolean) {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    if (deletePayments) {
+        // Headers delete will cascade to details
+        await supabase.from('pagos').delete().eq('inscripcion_id', id);
+    }
+
+    const { error } = await supabase
+        .from('inscripciones')
+        .delete()
+        .eq('id', id);
+
+    if (error) return { error: error.message };
+
+    revalidatePath('/admin');
     return { success: true };
 }

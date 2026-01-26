@@ -8,16 +8,73 @@ import {
     CheckCircle2,
     XCircle,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Trash2
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     getInscripcionesAdmin,
     updateInscripcionStatus,
-    getInscripcionDetalle
+    getInscripcionDetalle,
+    eliminarInscripcion
 } from '@/lib/actions/admin.actions';
+function DeleteConfirmDialog({ isOpen, onClose, onConfirm, alumnoName, hasPayments }: any) {
+    const [deletePayments, setDeletePayments] = useState(false);
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-primary-900/60 backdrop-blur-sm animate-in fade-in" onClick={onClose} />
+            <div className="relative w-full max-w-md bg-white rounded-[2rem] shadow-2xl p-8 animate-in zoom-in-95 duration-200">
+                <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Trash2 className="w-8 h-8" />
+                </div>
+
+                <h3 className="text-xl font-display text-center text-primary-900 mb-2">Eliminar Inscripción</h3>
+                <p className="text-primary-500 text-center mb-8">
+                    ¿Estás seguro que deseas eliminar la inscripción de <strong className="text-primary-900">{alumnoName}</strong>? Esta acción no se puede deshacer.
+                </p>
+
+                {hasPayments && (
+                    <div className="bg-rose-50 border border-rose-100 rounded-2xl p-5 mb-8 space-y-3">
+                        <div className="flex items-start gap-3">
+                            <Checkbox
+                                id="deletePayments"
+                                checked={deletePayments}
+                                onCheckedChange={(checked) => setDeletePayments(!!checked)}
+                                className="mt-1 border-rose-300 data-[state=checked]:bg-rose-600 data-[state=checked]:border-rose-600"
+                            />
+                            <div className="space-y-1">
+                                <label htmlFor="deletePayments" className="text-sm font-bold text-rose-900 leading-none">
+                                    Eliminar pagos asociados
+                                </label>
+                                <p className="text-xs text-rose-600 font-medium">
+                                    Si no marcas esta opción, los registros de cobros se conservarán en el historial de tesorería.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <div className="flex gap-3 mt-4">
+                    <Button variant="ghost" className="flex-1 py-6 rounded-xl text-primary-400" onClick={onClose}>
+                        Cancelar
+                    </Button>
+                    <Button
+                        className="flex-1 py-6 bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-lg shadow-rose-200"
+                        onClick={() => onConfirm(deletePayments)}
+                    >
+                        Eliminar Ahora
+                    </Button>
+                </div>
+            </div>
+        </div>
+    );
+}
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -42,6 +99,10 @@ export default function InscripcionesTable() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDetailLoading, setIsDetailLoading] = useState(false);
     const [isRejectMode, setIsRejectMode] = useState(false);
+
+    // Deletion state
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [inscripcionToDelete, setInscripcionToDelete] = useState<any>(null);
 
     const fetchData = async () => {
         setLoading(true);
@@ -72,6 +133,18 @@ export default function InscripcionesTable() {
         const result = await updateInscripcionStatus(id, newStatus, reason);
         if (result.success) {
             await fetchData();
+        }
+    };
+
+    const handleDelete = async (deletePayments: boolean) => {
+        if (!inscripcionToDelete) return;
+        const result = await eliminarInscripcion(inscripcionToDelete.id, deletePayments);
+        if (result.success) {
+            setIsDeleteDialogOpen(false);
+            setInscripcionToDelete(null);
+            fetchData();
+        } else {
+            alert('Error al eliminar: ' + result.error);
         }
     };
 
@@ -146,7 +219,7 @@ export default function InscripcionesTable() {
                                             {item.alumno?.dni}
                                         </td>
                                         <td className="px-6 py-5 text-primary-500 text-sm">
-                                            {format(new Date(item.created_at), 'dd MMM, yyyy', { locale: es })}
+                                            {format(new Date(item.created_at), 'dd/MM/yyyy', { locale: es })}
                                         </td>
                                         <td className="px-6 py-5">
                                             <div className="flex flex-col">
@@ -160,32 +233,45 @@ export default function InscripcionesTable() {
                                             </Badge>
                                         </td>
                                         <td className="px-6 py-5 text-right">
-                                            <div className="flex justify-end gap-2">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-8 w-8 text-primary-400 hover:text-primary-600"
+                                            <div className="flex justify-end gap-1">
+                                                <button
                                                     onClick={() => handleOpenDetail(item.id)}
+                                                    className="flex flex-col items-center justify-center h-16 w-14 rounded-xl hover:bg-primary-50 text-primary-400 hover:text-primary-600 transition-all gap-1 cursor-pointer"
                                                     disabled={isDetailLoading}
                                                 >
-                                                    <Eye className="w-4 h-4" />
-                                                </Button>
-                                                <div className="flex border border-primary-100 rounded-lg p-0.5">
+                                                    <Eye className="w-4 h-4 shadow-sm" />
+                                                    <span className="text-[9px] font-black uppercase tracking-tighter">Detalle</span>
+                                                </button>
+
+                                                <div className="flex bg-primary-50/50 p-1 rounded-2xl gap-0.5">
                                                     <button
                                                         onClick={() => onUpdateStatus(item.id, 'aprobada')}
-                                                        className="p-1 hover:bg-emerald-50 text-emerald-500 rounded disabled:opacity-50"
+                                                        className="flex flex-col items-center justify-center h-14 w-14 rounded-xl hover:bg-white text-emerald-500 hover:shadow-sm transition-all gap-1 disabled:opacity-30 cursor-pointer"
                                                         disabled={item.estado === 'aprobada'}
                                                     >
                                                         <CheckCircle2 className="w-4 h-4" />
+                                                        <span className="text-[9px] font-black uppercase tracking-tighter">Aprobar</span>
                                                     </button>
                                                     <button
                                                         onClick={() => handleOpenDetail(item.id, true)}
-                                                        className="p-1 hover:bg-rose-50 text-rose-500 rounded disabled:opacity-50"
+                                                        className="flex flex-col items-center justify-center h-14 w-14 rounded-xl hover:bg-white text-rose-500 hover:shadow-sm transition-all gap-1 disabled:opacity-30 cursor-pointer"
                                                         disabled={item.estado === 'rechazada'}
                                                     >
                                                         <XCircle className="w-4 h-4" />
+                                                        <span className="text-[9px] font-black uppercase tracking-tighter">Rechazar</span>
                                                     </button>
                                                 </div>
+
+                                                <button
+                                                    onClick={() => {
+                                                        setInscripcionToDelete(item);
+                                                        setIsDeleteDialogOpen(true);
+                                                    }}
+                                                    className="flex flex-col items-center justify-center h-16 w-14 rounded-xl hover:bg-rose-50 text-rose-300 hover:text-rose-600 transition-all gap-1 cursor-pointer"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                    <span className="text-[9px] font-black uppercase tracking-tighter">Borrar</span>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -226,6 +312,17 @@ export default function InscripcionesTable() {
                 data={selectedInscripcion}
                 onUpdateStatus={onUpdateStatus}
                 initialRejectMode={isRejectMode}
+            />
+
+            <DeleteConfirmDialog
+                isOpen={isDeleteDialogOpen}
+                onClose={() => {
+                    setIsDeleteDialogOpen(false);
+                    setInscripcionToDelete(null);
+                }}
+                onConfirm={handleDelete}
+                alumnoName={inscripcionToDelete ? `${inscripcionToDelete.alumno?.apellido}, ${inscripcionToDelete.alumno?.nombre}` : ''}
+                hasPayments={true} // Por seguridad siempre consultamos si corresponde segun logica
             />
         </div>
     );

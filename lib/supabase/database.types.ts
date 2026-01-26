@@ -135,13 +135,52 @@ export type Database = {
           },
         ]
       }
+      detalles_pago: {
+        Row: {
+          concepto_pago_id: string
+          created_at: string | null
+          id: string
+          monto: number
+          pago_id: string
+        }
+        Insert: {
+          concepto_pago_id: string
+          created_at?: string | null
+          id?: string
+          monto: number
+          pago_id: string
+        }
+        Update: {
+          concepto_pago_id?: string
+          created_at?: string | null
+          id?: string
+          monto?: number
+          pago_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "detalles_pago_concepto_pago_id_fkey"
+            columns: ["concepto_pago_id"]
+            isOneToOne: false
+            referencedRelation: "conceptos_pago"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "detalles_pago_pago_id_fkey"
+            columns: ["pago_id"]
+            isOneToOne: false
+            referencedRelation: "pagos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       domicilios: {
         Row: {
           barrio_manzana_block: string | null
           calle: string
           casa_lote: string | null
           created_at: string | null
-          departamento: string
+          departamento_id: string | null
           id: string
           localidad_id: string
           numero: string
@@ -153,7 +192,7 @@ export type Database = {
           calle: string
           casa_lote?: string | null
           created_at?: string | null
-          departamento: string
+          departamento_id?: string | null
           id?: string
           localidad_id: string
           numero: string
@@ -165,7 +204,7 @@ export type Database = {
           calle?: string
           casa_lote?: string | null
           created_at?: string | null
-          departamento?: string
+          departamento_id?: string | null
           id?: string
           localidad_id?: string
           numero?: string
@@ -173,6 +212,13 @@ export type Database = {
           provincia_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "domicilios_departamento_id_fkey"
+            columns: ["departamento_id"]
+            isOneToOne: false
+            referencedRelation: "departamentos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "domicilios_localidad_id_fkey"
             columns: ["localidad_id"]
@@ -384,21 +430,31 @@ export type Database = {
       }
       localidades: {
         Row: {
+          departamento_id: string | null
           id: string
           nombre: string
           provincia_id: string
         }
         Insert: {
+          departamento_id?: string | null
           id?: string
           nombre: string
           provincia_id: string
         }
         Update: {
+          departamento_id?: string | null
           id?: string
           nombre?: string
           provincia_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "localidades_departamento_id_fkey"
+            columns: ["departamento_id"]
+            isOneToOne: false
+            referencedRelation: "departamentos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "localidades_provincia_id_fkey"
             columns: ["provincia_id"]
@@ -453,89 +509,46 @@ export type Database = {
         }
         Relationships: []
       }
-      pagos_inscripcion: {
+      pagos: {
         Row: {
-          concepto_pago_id: string
           created_at: string | null
           fecha_pago: string | null
           id: string
           inscripcion_id: string
-          monto: number
+          monto_total: number
+          nro_recibo: number
           observaciones: string | null
-          pagado: boolean | null
+          updated_at: string | null
           user_id: string | null
         }
         Insert: {
-          concepto_pago_id: string
           created_at?: string | null
           fecha_pago?: string | null
           id?: string
           inscripcion_id: string
-          monto: number
+          monto_total: number
+          nro_recibo?: number
           observaciones?: string | null
-          pagado?: boolean | null
+          updated_at?: string | null
           user_id?: string | null
         }
         Update: {
-          concepto_pago_id?: string
           created_at?: string | null
           fecha_pago?: string | null
           id?: string
           inscripcion_id?: string
-          monto?: number
+          monto_total?: number
+          nro_recibo?: number
           observaciones?: string | null
-          pagado?: boolean | null
+          updated_at?: string | null
           user_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "pagos_inscripcion_concepto_pago_id_fkey"
-            columns: ["concepto_pago_id"]
-            isOneToOne: false
-            referencedRelation: "conceptos_pago"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pagos_inscripcion_inscripcion_id_fkey"
+            foreignKeyName: "pagos_inscripcion_id_fkey"
             columns: ["inscripcion_id"]
             isOneToOne: false
             referencedRelation: "inscripciones"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      preceptor_cursos: {
-        Row: {
-          created_at: string | null
-          curso_id: string
-          id: string
-          preceptor_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          curso_id: string
-          id?: string
-          preceptor_id: string
-        }
-        Update: {
-          created_at?: string | null
-          curso_id?: string
-          id?: string
-          preceptor_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "preceptor_cursos_curso_id_fkey"
-            columns: ["curso_id"]
-            isOneToOne: false
-            referencedRelation: "cursos"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "preceptor_cursos_preceptor_id_fkey"
-            columns: ["preceptor_id"]
-            isOneToOne: false
-            referencedRelation: "perfiles"
             referencedColumns: ["id"]
           },
         ]
@@ -654,7 +667,7 @@ export type Database = {
           p_domicilio_casa_lote: string
           p_domicilio_barrio: string
           p_domicilio_provincia_id: string
-          p_domicilio_departamento: string
+          p_domicilio_departamento_id: string
           p_domicilio_localidad_id: string
           p_ciclo_lectivo: string
           p_curso_id: string
@@ -682,29 +695,27 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database["public"]
+type PublicSchema = Database["public"]
 
 export type Tables<
-  DefaultSchemaTableNameOrOptions extends
-  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+  PublicTableNameOrOptions extends
+  | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
   | { schema: keyof Database },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
-  }
-  ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-    Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+  ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+    Database[PublicTableNameOrOptions["schema"]]["Views"])
   : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-    Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+    Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
   ? R
   : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-    DefaultSchema["Views"])
-  ? (DefaultSchema["Tables"] &
-    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
+    PublicSchema["Views"])
+  ? (PublicSchema["Tables"] &
+    PublicSchema["Views"])[PublicTableNameOrOptions] extends {
       Row: infer R
     }
   ? R
@@ -712,22 +723,20 @@ export type Tables<
   : never
 
 export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema["Tables"]
+  PublicTableNameOrOptions extends
+  | keyof PublicSchema["Tables"]
   | { schema: keyof Database },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
-  }
-  ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+  ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
   : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
     Insert: infer I
   }
   ? I
   : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
     Insert: infer I
   }
   ? I
@@ -735,22 +744,20 @@ export type TablesInsert<
   : never
 
 export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema["Tables"]
+  PublicTableNameOrOptions extends
+  | keyof PublicSchema["Tables"]
   | { schema: keyof Database },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
-  }
-  ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+  ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
   : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
     Update: infer U
   }
   ? U
   : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
     Update: infer U
   }
   ? U
@@ -758,43 +765,29 @@ export type TablesUpdate<
   : never
 
 export type Enums<
-  DefaultSchemaEnumNameOrOptions extends
-  | keyof DefaultSchema["Enums"]
+  PublicEnumNameOrOptions extends
+  | keyof PublicSchema["Enums"]
   | { schema: keyof Database },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
-  }
-  ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
+  ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
   : never = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof Database
-}
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+> = PublicEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+  ? PublicSchema["Enums"][PublicEnumNameOrOptions]
   : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-  | keyof DefaultSchema["CompositeTypes"]
+  | keyof PublicSchema["CompositeTypes"]
   | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof Database
   }
   ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
   : never = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof Database
-}
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
   ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+  ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
   : never
-
-export const Constants = {
-  public: {
-    Enums: {
-      turno: ["Mañana", "Tarde"],
-    },
-  },
-} as const
