@@ -44,14 +44,25 @@ interface Alumno {
 interface PreceptorAlumnosTableProps {
     alumnos: Alumno[];
     cursos: Array<{ id: string; nombre: string }>;
+    total: number;
+    currentPage: number;
+    pageSize: number;
 }
 
-export function PreceptorAlumnosTable({ alumnos, cursos }: PreceptorAlumnosTableProps) {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [cursoFilter, setCursoFilter] = useState('all');
-    const [seguroFilter, setSeguroFilter] = useState('all');
-    const [docFilter, setDocFilter] = useState('all');
-    const [saludFilter, setSaludFilter] = useState('all');
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+export function PreceptorAlumnosTable({ alumnos, cursos, total, currentPage, pageSize }: PreceptorAlumnosTableProps) {
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
+    const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+    const cursoFilter = searchParams.get('cursoId') || 'all';
+    const seguroFilter = searchParams.get('seguro') || 'all';
+    const docFilter = searchParams.get('docRel') || 'all';
+    const saludFilter = searchParams.get('salud') || 'all';
+
     const [selectedAlumno, setSelectedAlumno] = useState<Alumno | null>(null);
 
     // Estados para modales
@@ -62,31 +73,30 @@ export function PreceptorAlumnosTable({ alumnos, cursos }: PreceptorAlumnosTable
     const [detailData, setDetailData] = useState<any>(null);
     const [isLoadingDetail, setIsLoadingDetail] = useState(false);
 
-    const filteredAlumnos = alumnos.filter((a) => {
-        const matchesSearch =
-            a.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            a.apellido.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            a.dni.includes(searchTerm);
+    const updateFilters = (updates: Record<string, string | number>) => {
+        const params = new URLSearchParams(searchParams.toString());
+        Object.entries(updates).forEach(([key, value]) => {
+            if (value === 'all' || value === '') {
+                params.delete(key);
+            } else {
+                params.set(key, value.toString());
+            }
+        });
+        // Reiniciar a página 1 cuando cambian filtros, a menos que se especifique otra
+        if (!updates.page) params.set('page', '1');
+        router.push(`${pathname}?${params.toString()}`);
+    };
 
-        const matchesCurso = cursoFilter === 'all' || a.cursoId === cursoFilter;
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value);
+        // Debounce manual simple o esperar enter? Hagamos timeout
+    };
 
-        const matchesSeguro =
-            seguroFilter === 'all' ||
-            (seguroFilter === 'pago' && a.tieneSeguro) ||
-            (seguroFilter === 'pendiente' && !a.tieneSeguro);
-
-        const matchesDoc =
-            docFilter === 'all' ||
-            (docFilter === 'completa' && a.documentacionCompleta) ||
-            (docFilter === 'pendiente' && !a.documentacionCompleta);
-
-        const matchesSalud =
-            saludFilter === 'all' ||
-            (saludFilter === 'cud' && a.tieneCud) ||
-            (saludFilter === 'discapacidad' && a.discapacidad && a.discapacidad.trim() !== '');
-
-        return matchesSearch && matchesCurso && matchesSeguro && matchesDoc && matchesSalud;
-    });
+    const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            updateFilters({ search: searchTerm });
+        }
+    };
 
     const handleMoveClick = (alumno: Alumno) => {
         setSelectedAlumno(alumno);
@@ -124,13 +134,14 @@ export function PreceptorAlumnosTable({ alumnos, cursos }: PreceptorAlumnosTable
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                        placeholder="Buscar por nombre, apellido o DNI..."
+                        placeholder="Buscar por nombre, apellido o DNI... (Enter)"
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={handleSearch}
+                        onKeyDown={handleSearchKeyDown}
                         className="pl-9"
                     />
                 </div>
-                <Select value={cursoFilter} onValueChange={setCursoFilter}>
+                <Select value={cursoFilter} onValueChange={(v) => updateFilters({ cursoId: v })}>
                     <SelectTrigger className="w-full md:w-[200px]">
                         <SelectValue placeholder="Filtrar por Curso" />
                     </SelectTrigger>
@@ -143,7 +154,7 @@ export function PreceptorAlumnosTable({ alumnos, cursos }: PreceptorAlumnosTable
                         ))}
                     </SelectContent>
                 </Select>
-                <Select value={seguroFilter} onValueChange={setSeguroFilter}>
+                <Select value={seguroFilter} onValueChange={(v) => updateFilters({ seguro: v })}>
                     <SelectTrigger className="w-full md:w-[180px]">
                         <SelectValue placeholder="Estado de Seguro" />
                     </SelectTrigger>
@@ -154,7 +165,7 @@ export function PreceptorAlumnosTable({ alumnos, cursos }: PreceptorAlumnosTable
                     </SelectContent>
                 </Select>
 
-                <Select value={docFilter} onValueChange={setDocFilter}>
+                <Select value={docFilter} onValueChange={(v) => updateFilters({ docRel: v })}>
                     <SelectTrigger className="w-full md:w-[180px]">
                         <SelectValue placeholder="Documentación" />
                     </SelectTrigger>
@@ -165,7 +176,7 @@ export function PreceptorAlumnosTable({ alumnos, cursos }: PreceptorAlumnosTable
                     </SelectContent>
                 </Select>
 
-                <Select value={saludFilter} onValueChange={setSaludFilter}>
+                <Select value={saludFilter} onValueChange={(v) => updateFilters({ salud: v })}>
                     <SelectTrigger className="w-full md:w-[180px]">
                         <SelectValue placeholder="Salud/Inclusión" />
                     </SelectTrigger>
@@ -191,14 +202,14 @@ export function PreceptorAlumnosTable({ alumnos, cursos }: PreceptorAlumnosTable
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filteredAlumnos.length === 0 ? (
+                        {alumnos.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
                                     No se encontraron alumnos con los filtros seleccionados
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            filteredAlumnos.map((alumno) => (
+                            alumnos.map((alumno) => (
                                 <TableRow key={alumno.id} className="hover:bg-primary-50/30 transition-colors">
                                     <TableCell className="font-semibold text-primary-900">{alumno.apellido}</TableCell>
                                     <TableCell className="text-primary-800">{alumno.nombre}</TableCell>
@@ -298,6 +309,31 @@ export function PreceptorAlumnosTable({ alumnos, cursos }: PreceptorAlumnosTable
                 data={detailData}
                 onUpdateStatus={async () => { }} // Preceptor no actualiza estado desde aquí
             />
+
+            {/* Pagination Controls */}
+            <div className="px-6 py-4 bg-white border border-primary-100 rounded-2xl flex items-center justify-between shadow-sm mt-4">
+                <p className="text-sm text-primary-500 font-medium">
+                    Mostrando <span className="text-primary-900">{alumnos.length}</span> de <span className="text-primary-900">{total}</span> alumnos
+                </p>
+                <div className="flex gap-2">
+                    <Button
+                        variant="outline" size="sm"
+                        disabled={currentPage === 1}
+                        onClick={() => updateFilters({ page: currentPage - 1 })}
+                        className="border-primary-100"
+                    >
+                        <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    <Button
+                        variant="outline" size="sm"
+                        disabled={currentPage * pageSize >= total}
+                        onClick={() => updateFilters({ page: currentPage + 1 })}
+                        className="border-primary-100"
+                    >
+                        <ChevronRight className="w-4 h-4" />
+                    </Button>
+                </div>
+            </div>
         </div >
     );
 }

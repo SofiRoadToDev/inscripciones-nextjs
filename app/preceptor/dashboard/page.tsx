@@ -2,9 +2,13 @@ import { getPreceptorStats } from '@/lib/actions/preceptor.actions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, ShieldCheck, ShieldAlert, BarChart } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CicloLectivoSelector } from '@/components/preceptor/CicloLectivoSelector';
 
-export default async function PreceptorDashboardPage() {
-    const result = await getPreceptorStats();
+export default async function PreceptorDashboardPage(props: { searchParams: Promise<{ ciclo?: string }> }) {
+    const searchParams = await props.searchParams;
+    const defaultYear = new Date().getFullYear().toString();
+    const ciclo = searchParams.ciclo || defaultYear;
+    const result = await getPreceptorStats(ciclo);
 
     if (result.error) {
         return (
@@ -23,9 +27,12 @@ export default async function PreceptorDashboardPage() {
     if (!stats || stats.totalAlumnos === 0 && stats.cursosStats.length === 0) {
         return (
             <div className="space-y-8">
-                <div>
-                    <h1 className="text-3xl font-bold text-primary-900 tracking-tight">Dashboard del Preceptor</h1>
-                    <p className="text-primary-500 mt-1">Resumen operativo de tus cursos asignados.</p>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-primary-900 tracking-tight">Dashboard del Preceptor</h1>
+                        <p className="text-primary-500 mt-1">Resumen operativo de tus cursos asignados.</p>
+                    </div>
+                    <CicloLectivoSelector defaultValue={defaultYear} />
                 </div>
                 <Card className="border-primary-100 shadow-sm p-12 text-center">
                     <div className="bg-primary-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -40,9 +47,12 @@ export default async function PreceptorDashboardPage() {
 
     return (
         <div className="space-y-8">
-            <div>
-                <h1 className="text-3xl font-bold text-primary-900 tracking-tight">Dashboard del Preceptor</h1>
-                <p className="text-primary-500 mt-1">Resumen operativo de tus cursos asignados.</p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-primary-900 tracking-tight">Dashboard del Preceptor</h1>
+                    <p className="text-primary-500 mt-1">Resumen operativo de tus cursos asignados.</p>
+                </div>
+                <CicloLectivoSelector defaultValue={defaultYear} />
             </div>
 
             {/* Metrics */}

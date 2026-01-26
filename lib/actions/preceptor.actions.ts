@@ -35,8 +35,8 @@ export async function crearPreceptorAction(params: {
         }
 
         // 2. Crear perfil de preceptor
-        const { data: profile, error: profileError } = await adminClient
-            .from('perfiles')
+        const { data: profile, error: profileError } = await (adminClient
+            .from('perfiles') as any)
             .insert({
                 user_id: authData.user.id,
                 role: 'preceptor',
@@ -60,8 +60,8 @@ export async function crearPreceptorAction(params: {
                 curso_id: cursoId,
             }));
 
-            const { error: cursosError } = await adminClient
-                .from('preceptor_cursos')
+            const { error: cursosError } = await (adminClient
+                .from('preceptor_cursos') as any)
                 .insert(asignaciones);
 
             if (cursosError) {
@@ -111,8 +111,8 @@ export async function actualizarPreceptorAction(
         }
 
         // 2. Eliminar asignaciones actuales
-        await adminClient
-            .from('preceptor_cursos')
+        await (adminClient
+            .from('preceptor_cursos') as any)
             .delete()
             .eq('preceptor_id', preceptorId);
 
@@ -123,8 +123,8 @@ export async function actualizarPreceptorAction(
                 curso_id: cursoId,
             }));
 
-            const { error } = await adminClient
-                .from('preceptor_cursos')
+            const { error } = await (adminClient
+                .from('preceptor_cursos') as any)
                 .insert(asignaciones);
 
             if (error) {
@@ -160,8 +160,8 @@ export async function eliminarPreceptorAction(preceptorId: string) {
         }
 
         // 2. Eliminar asignaciones de cursos
-        await adminClient
-            .from('preceptor_cursos')
+        await (adminClient
+            .from('preceptor_cursos') as any)
             .delete()
             .eq('preceptor_id', preceptorId);
 
@@ -201,8 +201,8 @@ export async function getPreceptoresAction() {
         const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
-        const { data, error } = await supabase
-            .from('perfiles')
+        const result = await (supabase
+            .from('perfiles') as any)
             .select(`
                 id,
                 nombre,
@@ -218,6 +218,8 @@ export async function getPreceptoresAction() {
             `)
             .eq('role', 'preceptor')
             .order('apellido', { ascending: true });
+
+        const { data, error } = result;
 
         if (error) {
             return { error: error.message };
@@ -296,15 +298,15 @@ export async function moverAlumnoAction(
 /**
  * Obtiene estadísticas resumidas para el dashboard del preceptor
  */
-export async function getPreceptorStats() {
+export async function getPreceptorStats(cicloLectivo: string = new Date().getFullYear().toString()) {
     try {
         const profile = await requireRole('preceptor');
         const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         // 1. Obtener los IDs de los cursos asignados al preceptor
-        const { data: asignaciones } = await supabase
-            .from('preceptor_cursos')
+        const { data: asignaciones } = await (supabase
+            .from('preceptor_cursos') as any)
             .select('curso_id')
             .eq('preceptor_id', profile.id);
 
@@ -338,7 +340,8 @@ export async function getPreceptorStats() {
                 )
             `)
             .in('curso_id', cursoIds)
-            .eq('estado', 'aprobada');
+            .eq('estado', 'aprobada')
+            .eq('ciclo_lectivo', cicloLectivo);
 
         if (error) return { error: error.message };
 
@@ -388,15 +391,29 @@ export async function getPreceptorStats() {
 /**
  * Obtiene la lista de alumnos de los cursos asignados al preceptor
  */
-export async function getAlumnosPreceptorAction() {
+export async function getAlumnosPreceptorAction(params: {
+    ciclo?: string;
+    search?: string;
+    page?: number;
+    pageSize?: number;
+    cursoId?: string;
+    seguro?: string;
+    docRel?: string;
+    salud?: string;
+}) {
     try {
         const profile = await requireRole('preceptor');
         const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
+        const cicloLectivo = params.ciclo || new Date().getFullYear().toString();
+        const page = params.page || 1;
+        const pageSize = params.pageSize || 15;
+        const start = (page - 1) * pageSize;
+
         // 1. Obtener los cursos asignados
-        const { data: asignaciones } = await supabase
-            .from('preceptor_cursos')
+        const { data: asignaciones } = await (supabase
+            .from('preceptor_cursos') as any)
             .select(`
                 curso_id,
                 curso:cursos(id, nombre)
@@ -413,13 +430,14 @@ export async function getAlumnosPreceptorAction() {
             return { data: [], misCursos: [] };
         }
 
-        // 2. Obtener alumnos de esos cursos a través de la relación con la tabla alumnos
-        const { data, error } = await supabase
+        // 2. Construir Query con Filtros en el Servidor
+        let query = supabase
             .from('inscripciones')
             .select(`
                 id,
                 curso_id,
                 estado,
+                ciclo_lectivo,
                 documentacion_completa,
                 alumno:alumnos(
                     id,
@@ -440,21 +458,45 @@ export async function getAlumnosPreceptorAction() {
                         concepto:conceptos_pago(nombre)
                     )
                 )
-            `)
+            `, { count: 'exact' })
             .in('curso_id', cursoIds)
-            .eq('estado', 'aprobada');
+            .eq('estado', 'aprobada')
+            .eq('ciclo_lectivo', cicloLectivo);
+
+        // Filtro por curso específico (dentro de los permitidos)
+        if (params.cursoId && params.cursoId !== 'all') {
+            query = query.eq('curso_id', params.cursoId);
+        }
+
+        // Filtro por documentación
+        if (params.docRel === 'completa') {
+            query = query.eq('documentacion_completa', true);
+        } else if (params.docRel === 'pendiente') {
+            query = query.eq('documentacion_completa', false);
+        }
+
+        // Búsqueda por texto (DNI, Nombre, Apellido)
+        if (params.search) {
+            query = query.or(`alumno.dni.ilike.%${params.search}%,alumno.nombre.ilike.%${params.search}%,alumno.apellido.ilike.%${params.search}%`);
+        }
+
+        const { data, count, error } = await query
+            .order('created_at', { ascending: false })
+            .range(start, start + pageSize - 1);
 
         if (error) return { error: error.message };
 
-        // 3. Formatear datos para la tabla y ordenar manualmente por apellido
-        const alumnos = data.map((ins: any) => {
-            const tieneSeguro = ins.pagos?.some((p: any) =>
-                p.concepto?.nombre?.toLowerCase().includes('seguro') && p.pagado
+        // 4. Formatear datos y aplicar filtros que requieran lógica compleja (Seguro/Salud si no se pudo en query)
+        let alumnos = (data || []).map((ins: any) => {
+            const tieneSeguro = ins.pagos?.some((pago: any) =>
+                pago.detalles?.some((d: any) =>
+                    d.concepto?.nombre?.toLowerCase().includes('seguro')
+                )
             );
 
             return {
-                id: ins.id, // ID de inscripción
-                alumnoId: ins.alumno?.id, // ID del alumno para edición
+                id: ins.id,
+                alumnoId: ins.alumno?.id,
                 nombre: ins.alumno?.nombre || 'S/N',
                 apellido: ins.alumno?.apellido || 'S/N',
                 dni: ins.alumno?.dni || '-',
@@ -465,9 +507,26 @@ export async function getAlumnosPreceptorAction() {
                 discapacidad: ins.ficha_salud?.discapacidad || null,
                 documentacionCompleta: !!ins.documentacion_completa
             };
-        }).sort((a, b) => a.apellido.localeCompare(b.apellido));
+        });
 
-        return { data: alumnos, misCursos };
+        // Filtrado Post-Query para campos calculados o relaciones anidadas complejas si fuera necesario
+        if (params.seguro && params.seguro !== 'all') {
+            const isPago = params.seguro === 'pago';
+            alumnos = alumnos.filter(a => a.tieneSeguro === isPago);
+        }
+
+        if (params.salud && params.salud !== 'all') {
+            if (params.salud === 'cud') alumnos = alumnos.filter(a => a.tieneCud);
+            if (params.salud === 'discapacidad') alumnos = alumnos.filter(a => a.discapacidad && a.discapacidad.trim() !== '');
+        }
+
+        return {
+            data: alumnos,
+            misCursos,
+            total: count || 0,
+            page,
+            pageSize
+        };
     } catch (error: any) {
         return { error: error.message };
     }
