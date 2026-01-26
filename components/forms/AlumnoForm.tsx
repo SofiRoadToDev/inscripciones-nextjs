@@ -75,9 +75,19 @@ export default function AlumnoForm({ onNext }: AlumnoFormProps) {
     useEffect(() => {
         const savedData = formStorageService.getTabData('alumno')
         if (savedData) {
-            form.reset(savedData)
+            form.reset({
+                ...savedData,
+                email: savedData.email || '',
+                telefono: savedData.telefono || '',
+                domicilio: {
+                    ...savedData.domicilio,
+                    piso_depto: savedData.domicilio?.piso_depto || '',
+                    casa_lote: savedData.domicilio?.casa_lote || '',
+                    barrio_manzana_block: savedData.domicilio?.barrio_manzana_block || '',
+                }
+            })
         }
-    }, [form, reset])
+    }, [form])
 
     // Guardar datos al cambiar cualquier campo
     useEffect(() => {

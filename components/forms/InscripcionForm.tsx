@@ -53,7 +53,7 @@ export default function InscripcionForm({ onSubmit, onBack, isSubmitting = false
             ciclo_lectivo: currentYear,
             repite: false,
             materias_pendientes: '',
-            escuela_procedencia_id: '',
+            escuela_procedencia: '',
         },
     })
 
@@ -66,9 +66,16 @@ export default function InscripcionForm({ onSubmit, onBack, isSubmitting = false
     useEffect(() => {
         const savedData = formStorageService.getTabData('inscripcion')
         if (savedData) {
-            reset(savedData)
+            // Asegurar que los valores no sean undefined para evitar errores de controlled/uncontrolled
+            reset({
+                nivel_codigo: savedData.nivel_codigo || '',
+                ciclo_lectivo: savedData.ciclo_lectivo || currentYear,
+                repite: !!savedData.repite,
+                materias_pendientes: savedData.materias_pendientes || '',
+                escuela_procedencia: savedData.escuela_procedencia || '',
+            })
         }
-    }, [reset])
+    }, [reset, currentYear])
 
     useEffect(() => {
         const subscription = watch((value) => {
@@ -205,7 +212,7 @@ export default function InscripcionForm({ onSubmit, onBack, isSubmitting = false
                             {/* Escuela de Procedencia */}
                             <FormField
                                 control={form.control}
-                                name="escuela_nombre_nueva"
+                                name="escuela_procedencia"
                                 render={({ field }) => (
                                     <FormItem className="space-y-3">
                                         <div className="flex items-center gap-2 text-primary-800 mb-2 font-medium">

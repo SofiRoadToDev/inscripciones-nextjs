@@ -25,13 +25,16 @@ export default function InscripcionTabs() {
 
         try {
             const allData = formStorageService.getAllFormData()
+            console.log('📦 Iniciando envío de inscripción con todos los datos:', allData)
 
             // Validaciones básicas de que todos los tabs tienen datos
             if (!allData.alumno || !allData.tutores || !allData.fichaSalud || !allData.inscripcion) {
+                console.warn('⚠️ Faltan datos en el storage:', allData);
                 throw new Error("Por favor complete todos los pasos del formulario antes de finalizar.")
             }
 
             const result = await registrarInscripcionAction(allData)
+            console.log('🚀 Resultado del registro:', result)
 
             if (result.success) {
                 setSuccess(true)
@@ -40,7 +43,8 @@ export default function InscripcionTabs() {
                 setError(result.error || "Ocurrió un error inesperado al registrar la inscripción.")
             }
         } catch (err: any) {
-            setError(err.message)
+            console.error('❌ Error capturado en handleFinalSubmit:', err)
+            setError(err.message || "Ocurrió un fallo en la conexión con el servidor.")
         } finally {
             setIsSubmitting(false)
         }

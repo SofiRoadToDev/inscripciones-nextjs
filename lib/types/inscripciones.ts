@@ -100,5 +100,5 @@ export interface InscripcionCompleta {
     nivel_codigo: string;
     repite: boolean;
     materias_pendientes?: string | null;
-    escuela_procedencia_id?: string | null;
+    escuela_procedencia?: string | null;
 }
