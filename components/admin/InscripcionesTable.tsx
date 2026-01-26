@@ -5,11 +5,12 @@ import {
     Search,
     Filter,
     Eye,
-    CheckCircle2,
     XCircle,
     ChevronLeft,
     ChevronRight,
-    Trash2
+    Trash2,
+    AlertCircle,
+    CheckCircle2
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -172,10 +173,6 @@ export default function InscripcionesTable() {
                         <option value="aprobada">Aprobadas</option>
                         <option value="rechazada">Rechazadas</option>
                     </select>
-                    <Button variant="outline" className="gap-2 border-primary-100">
-                        <Filter className="w-4 h-4" />
-                        Más Filtros
-                    </Button>
                 </div>
             </div>
 

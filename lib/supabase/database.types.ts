@@ -263,6 +263,7 @@ export type Database = {
         Row: {
           alergias: string | null
           created_at: string | null
+          cud: boolean
           discapacidad: string | null
           enfermedad_cronica: string | null
           id: string
@@ -273,6 +274,7 @@ export type Database = {
         Insert: {
           alergias?: string | null
           created_at?: string | null
+          cud?: boolean
           discapacidad?: string | null
           enfermedad_cronica?: string | null
           id?: string
@@ -283,6 +285,7 @@ export type Database = {
         Update: {
           alergias?: string | null
           created_at?: string | null
+          cud?: boolean
           discapacidad?: string | null
           enfermedad_cronica?: string | null
           id?: string
@@ -680,6 +683,7 @@ export type Database = {
           p_discapacidad: string
           p_medicamentos: string
           p_vacunacion_completa: boolean
+          p_cud: boolean
           p_observaciones: string
           p_tutores: Json
         }

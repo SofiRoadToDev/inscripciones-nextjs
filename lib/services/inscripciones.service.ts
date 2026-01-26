@@ -102,6 +102,7 @@ export class InscripcionesService {
                     discapacidad: salud.discapacidad || null,
                     medicamentos: salud.medicamentos || null,
                     vacunacion_completa: salud.vacunacion_completa,
+                    cud: salud.cud || false,
                     observaciones: salud.observaciones || null
                 })
                 .select()

@@ -14,7 +14,8 @@ import {
     ClipboardCheck,
     ChevronLeft,
     ChevronRight,
-    Check
+    Check,
+    CheckCircle2
 } from 'lucide-react'
 import {
     Form,
@@ -46,6 +47,7 @@ export default function FichaSaludForm({ onNext, onBack, isSubmitting = false }:
             discapacidad: '',
             medicamentos: '',
             vacunacion_completa: false,
+            cud: false,
             observaciones: '',
         },
     })
@@ -184,27 +186,52 @@ export default function FichaSaludForm({ onNext, onBack, isSubmitting = false }:
 
                         <hr className="border-neutral-100" />
 
-                        {/* Vacunación */}
-                        <div className="bg-neutral-50 rounded-xl p-6 border border-neutral-100">
+                        {/* Vacunación y CUD */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-neutral-50 rounded-xl p-6 border border-neutral-100">
                             <FormField
                                 control={form.control}
                                 name="vacunacion_completa"
                                 render={({ field }) => (
-                                    <FormItem className="flex flex-row items-center justify-between space-y-0">
+                                    <FormItem className="flex flex-row items-center justify-between space-y-0 gap-4">
                                         <div className="space-y-1">
                                             <div className="flex items-center gap-2 text-primary-800">
                                                 <Syringe className="w-5 h-5" />
-                                                <FormLabel className="text-lg">Esquema de Vacunación</FormLabel>
+                                                <FormLabel className="text-[14px]">Esquema de Vacunación</FormLabel>
                                             </div>
-                                            <FormDescription className="text-neutral-500">
-                                                ¿Cuenta con todas las vacunas obligatorias según el calendario nacional para su edad?
+                                            <FormDescription className="text-[11px] text-neutral-500 leading-tight">
+                                                ¿Cuenta con todas las vacunas obligatorias?
                                             </FormDescription>
                                         </div>
                                         <FormControl>
                                             <Switch
                                                 checked={field.value}
                                                 onCheckedChange={field.onChange}
-                                                className="data-[state=checked]:bg-green-600"
+                                                className="data-[state=checked]:bg-green-600 scale-90"
+                                            />
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="cud"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-row items-center justify-between space-y-0 gap-4 border-l border-neutral-200 pl-6">
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-2 text-primary-800">
+                                                <ClipboardCheck className="w-5 h-5" />
+                                                <FormLabel className="text-[14px]">Certificado CUD</FormLabel>
+                                            </div>
+                                            <FormDescription className="text-[11px] text-neutral-500 leading-tight">
+                                                ¿Presentó el Certificado Único de Discapacidad?
+                                            </FormDescription>
+                                        </div>
+                                        <FormControl>
+                                            <Switch
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                                className="data-[state=checked]:bg-blue-600 scale-90"
                                             />
                                         </FormControl>
                                     </FormItem>

@@ -21,7 +21,8 @@ export async function getInscripcionesAdmin(params: {
       *,
       alumno:alumnos(id, nombre, apellido, dni),
       curso:cursos(id, nombre),
-      nivel:niveles(codigo, nivel)
+      nivel:niveles(codigo, nivel),
+      ficha_salud:fichas_salud(id, discapacidad, cud)
     `, { count: 'exact' });
 
     // Filtros
