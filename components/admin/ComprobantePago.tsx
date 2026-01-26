@@ -53,7 +53,7 @@ const ComprobantePago = forwardRef<HTMLDivElement, Props>(({ id, alumno, pago },
                     />
                 </div>
 
-                <div className="text-center mt-auto space-y-2">
+                <div className="text-center mt-10 space-y-2">
                     <p className="font-bold text-xs uppercase tracking-widest">Comprobante Nº</p>
                     <p className="font-mono text-xl font-black bg-white px-2 py-1 border border-black rounded shadow-sm">
                         {reciboId.split('-')[1]}
@@ -101,7 +101,7 @@ const ComprobantePago = forwardRef<HTMLDivElement, Props>(({ id, alumno, pago },
 
                     <div className="mb-6 flex-1">
                         <p className="font-black mb-3 text-xs tracking-widest">En concepto de:</p>
-                        <ul className="space-y-2 ml-4">
+                        <ul className="grid grid-cols-2 gap-x-8 gap-y-2 ml-4">
                             {pago.conceptos.map((c, i) => (
                                 <li key={i} className="flex justify-between items-center border-b border-gray-100 pb-1">
                                     <span className="font-medium text-[12px]">• {c.nombre} {c.cantidad ? `(Cant: ${c.cantidad})` : ''}</span>

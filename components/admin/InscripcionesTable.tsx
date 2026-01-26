@@ -41,6 +41,7 @@ export default function InscripcionesTable() {
     const [selectedInscripcion, setSelectedInscripcion] = useState<any | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDetailLoading, setIsDetailLoading] = useState(false);
+    const [isRejectMode, setIsRejectMode] = useState(false);
 
     const fetchData = async () => {
         setLoading(true);
@@ -56,8 +57,9 @@ export default function InscripcionesTable() {
         fetchData();
     }, [search, estado, page]);
 
-    const handleOpenDetail = async (id: string) => {
+    const handleOpenDetail = async (id: string, reject: boolean = false) => {
         setIsDetailLoading(true);
+        setIsRejectMode(reject);
         const result = await getInscripcionDetalle(id);
         if (result.data) {
             setSelectedInscripcion(result.data);
@@ -177,7 +179,7 @@ export default function InscripcionesTable() {
                                                         <CheckCircle2 className="w-4 h-4" />
                                                     </button>
                                                     <button
-                                                        onClick={() => handleOpenDetail(item.id)}
+                                                        onClick={() => handleOpenDetail(item.id, true)}
                                                         className="p-1 hover:bg-rose-50 text-rose-500 rounded disabled:opacity-50"
                                                         disabled={item.estado === 'rechazada'}
                                                     >
@@ -223,6 +225,7 @@ export default function InscripcionesTable() {
                 onClose={() => setIsModalOpen(false)}
                 data={selectedInscripcion}
                 onUpdateStatus={onUpdateStatus}
+                initialRejectMode={isRejectMode}
             />
         </div>
     );

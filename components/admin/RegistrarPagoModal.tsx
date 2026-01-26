@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { X, CreditCard, Calendar, Loader2, Printer, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { registrarPago } from '@/lib/actions/admin.actions';
 import ComprobantePago from './ComprobantePago';
 
@@ -16,8 +17,8 @@ interface Props {
 }
 
 export default function RegistrarPagoModal({ isOpen, onClose, inscripcion, conceptos, onSuccess }: Props) {
-    const [selectedConcepto, setSelectedConcepto] = useState<string>('');
-    const [monto, setMonto] = useState<string>('');
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [montoTotal, setMontoTotal] = useState<number>(0);
     const [fecha, setFecha] = useState<string>(new Date().toISOString().split('T')[0]);
     const [observaciones, setObservaciones] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,12 +28,20 @@ export default function RegistrarPagoModal({ isOpen, onClose, inscripcion, conce
 
     if (!isOpen || !inscripcion) return null;
 
-    const handleConceptoChange = (id: string) => {
-        setSelectedConcepto(id);
-        const concepto = conceptos.find(c => c.id === id);
-        if (concepto) {
-            setMonto(concepto.monto.toString());
-        }
+    const toggleConcepto = (id: string) => {
+        if (!id) return;
+        const newIds = selectedIds.includes(id)
+            ? selectedIds.filter(i => i !== id)
+            : [...selectedIds, id];
+
+        setSelectedIds(newIds);
+
+        // Auto-calculate total
+        const total = newIds.reduce((acc, currentId) => {
+            const c = conceptos.find(item => item.id === currentId);
+            return acc + (c?.monto || 0);
+        }, 0);
+        setMontoTotal(total);
     };
 
     const handlePrint = () => {
@@ -58,22 +67,29 @@ export default function RegistrarPagoModal({ isOpen, onClose, inscripcion, conce
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!selectedConcepto || !monto) return;
+        if (selectedIds.length === 0 || montoTotal <= 0) return;
 
         setIsSubmitting(true);
+        const pagosData = selectedIds.map(id => ({
+            conceptoId: id,
+            monto: conceptos.find(c => c.id === id)?.monto || 0
+        }));
+
         const result = await registrarPago({
             inscripcionId: inscripcion.id,
-            conceptoId: selectedConcepto,
-            monto: parseFloat(monto),
+            pagos: pagosData,
             fechaPago: new Date(fecha).toISOString(),
             observaciones
         });
 
         if (result.success) {
-            const concepto = conceptos.find(c => c.id === selectedConcepto);
             setUltimoPago({
-                concepto: concepto?.nombre || '',
-                monto: parseFloat(monto),
+                conceptos: selectedIds.map(id => ({
+                    nombre: conceptos.find(c => c.id === id)?.nombre || '',
+                    monto: conceptos.find(c => c.id === id)?.monto || 0,
+                    cantidad: 1
+                })),
+                montoTotal: montoTotal,
                 fecha: new Date(fecha).toISOString(),
                 observaciones
             });
@@ -96,7 +112,7 @@ export default function RegistrarPagoModal({ isOpen, onClose, inscripcion, conce
                         </div>
                         <div>
                             <h3 className="text-2xl font-display text-primary-900">¡Pago Registrado!</h3>
-                            <p className="text-primary-500 mt-2">El cobro de <strong>{ultimoPago.concepto}</strong> por <strong>${ultimoPago.monto}</strong> se procesó correctamente.</p>
+                            <p className="text-primary-500 mt-2">Se procesaron <strong>{ultimoPago.conceptos.length}</strong> conceptos por un total de <strong>${ultimoPago.montoTotal}</strong>.</p>
                         </div>
 
                         <div className="space-y-3 pt-4">
@@ -121,8 +137,11 @@ export default function RegistrarPagoModal({ isOpen, onClose, inscripcion, conce
                             <div ref={printRef} id="print-section">
                                 <ComprobantePago
                                     alumno={inscripcion.alumno}
-                                    curso={inscripcion.curso?.nombre}
-                                    pago={ultimoPago}
+                                    pago={{
+                                        fecha: ultimoPago.fecha,
+                                        importe_total: ultimoPago.montoTotal,
+                                        conceptos: ultimoPago.conceptos
+                                    }}
                                 />
                             </div>
                         </div>
@@ -153,29 +172,49 @@ export default function RegistrarPagoModal({ isOpen, onClose, inscripcion, conce
                             </div>
 
                             <div className="space-y-1">
-                                <label className="text-[10px] font-black uppercase text-primary-300 ml-1">Concepto de Pago</label>
+                                <div className="flex justify-between items-end ml-1 mb-1">
+                                    <label className="text-[10px] font-black uppercase text-primary-300">Conceptos de Pago</label>
+                                    <span className="text-[9px] font-bold text-accent-600 uppercase bg-accent-50 px-2 py-0.5 rounded-full">Selección Múltiple Habilitada</span>
+                                </div>
                                 <select
                                     className="w-full bg-primary-50 border-none rounded-2xl px-5 py-4 text-sm font-semibold text-primary-900 focus:ring-2 focus:ring-primary-500 appearance-none shadow-inner"
-                                    value={selectedConcepto}
-                                    onChange={(e) => handleConceptoChange(e.target.value)}
-                                    required
+                                    value=""
+                                    onChange={(e) => toggleConcepto(e.target.value)}
                                 >
-                                    <option value="">Seleccionar concepto...</option>
-                                    {conceptos.map(c => (
-                                        <option key={c.id} value={c.id}>{c.nombre}</option>
+                                    <option value="">Añadir concepto...</option>
+                                    {conceptos.filter(c => !selectedIds.includes(c.id)).map(c => (
+                                        <option key={c.id} value={c.id}>{c.nombre} (${c.monto})</option>
                                     ))}
                                 </select>
+
+                                {selectedIds.length > 0 && (
+                                    <div className="flex flex-wrap gap-2 mt-3 p-1">
+                                        {selectedIds.map(id => {
+                                            const c = conceptos.find(item => item.id === id);
+                                            return (
+                                                <Badge
+                                                    key={id}
+                                                    variant="secondary"
+                                                    className="bg-primary-100 text-primary-700 hover:bg-rose-100 hover:text-rose-700 cursor-pointer transition-colors px-3 py-1.5 rounded-xl border-none group"
+                                                    onClick={() => toggleConcepto(id)}
+                                                >
+                                                    {c?.nombre} <span className="ml-1 opacity-50 group-hover:hidden">×</span>
+                                                    <span className="hidden group-hover:inline ml-1">Quitar</span>
+                                                </Badge>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-black uppercase text-primary-300 ml-1">Monto ($)</label>
+                                    <label className="text-[10px] font-black uppercase text-primary-300 ml-1">Monto Total ($)</label>
                                     <Input
                                         type="number"
-                                        value={monto}
-                                        onChange={(e) => setMonto(e.target.value)}
-                                        className="bg-primary-50 border-none rounded-2xl h-14 pl-6 text-lg font-display font-bold shadow-inner"
-                                        required
+                                        value={montoTotal}
+                                        readOnly
+                                        className="bg-primary-50 border-none rounded-2xl h-14 pl-6 text-lg font-display font-bold shadow-inner opacity-80 cursor-not-allowed"
                                     />
                                 </div>
                                 <div className="space-y-1">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     X,
     MapPin,
@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -30,15 +31,24 @@ interface Props {
     onClose: () => void;
     data: any | null;
     onUpdateStatus: (id: string, state: 'aprobada' | 'rechazada', reason?: string) => Promise<void>;
+    initialRejectMode?: boolean;
 }
 
-export default function InscripcionDetalleModal({ isOpen, onClose, data, onUpdateStatus }: Props) {
+export default function InscripcionDetalleModal({ isOpen, onClose, data, onUpdateStatus, initialRejectMode = false }: Props) {
     const [showRejectReason, setShowRejectReason] = useState(false);
     const [reason, setReason] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const fichaRef = useRef<HTMLDivElement>(null);
     const reciboRef = useRef<HTMLDivElement>(null);
+
+    // Reset state when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            setShowRejectReason(initialRejectMode);
+            setReason('');
+        }
+    }, [isOpen, initialRejectMode]);
 
     if (!isOpen || !data) return null;
 
@@ -118,8 +128,9 @@ export default function InscripcionDetalleModal({ isOpen, onClose, data, onUpdat
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-9 gap-2 text-primary-600 hover:bg-white rounded-lg"
+                                className="h-9 gap-2 text-primary-600 hover:bg-white rounded-lg disabled:opacity-30"
                                 onClick={() => handlePrint(fichaRef)}
+                                disabled={data.estado === 'rechazada'}
                             >
                                 <FileText className="w-4 h-4" />
                                 <span className="text-[10px] font-black uppercase">Ficha</span>
@@ -129,7 +140,7 @@ export default function InscripcionDetalleModal({ isOpen, onClose, data, onUpdat
                                 size="sm"
                                 className="h-9 gap-2 text-emerald-600 hover:bg-white rounded-lg disabled:opacity-30"
                                 onClick={() => handlePrint(reciboRef)}
-                                disabled={!pagoSeguro}
+                                disabled={!pagoSeguro || data.estado === 'rechazada'}
                             >
                                 <Receipt className="w-4 h-4" />
                                 <span className="text-[10px] font-black uppercase">Recibo</span>
@@ -261,12 +272,14 @@ export default function InscripcionDetalleModal({ isOpen, onClose, data, onUpdat
                             <div ref={reciboRef}>
                                 <ComprobantePago
                                     alumno={data.alumno}
-                                    curso={data.curso?.nombre}
                                     pago={{
-                                        concepto: pagoSeguro.concepto.nombre,
-                                        monto: pagoSeguro.monto,
+                                        conceptos: [{
+                                            nombre: pagoSeguro.concepto.nombre,
+                                            monto: pagoSeguro.monto,
+                                            cantidad: 1
+                                        }],
                                         fecha: pagoSeguro.fecha_pago,
-                                        observaciones: pagoSeguro.observaciones
+                                        importe_total: pagoSeguro.monto
                                     }}
                                 />
                             </div>
@@ -277,15 +290,19 @@ export default function InscripcionDetalleModal({ isOpen, onClose, data, onUpdat
                 {/* Footer Actions */}
                 <div className="sticky bottom-0 bg-white border-t border-primary-100 p-6 space-y-4 shrink-0 shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.05)]">
                     {showRejectReason && (
-                        <div className="animate-in slide-in-from-bottom-2 duration-300">
-                            <p className="text-xs font-bold text-primary-900 uppercase mb-2">Motivo del Rechazo</p>
-                            <Input
-                                placeholder="Ej: Documentación incompleta, Falta vacante..."
+                        <div className="animate-in slide-in-from-bottom-2 duration-300 space-y-3 p-4 bg-rose-50/50 rounded-xl border border-rose-100">
+                            <div className="flex items-center gap-2 text-rose-600">
+                                <AlertCircle className="w-4 h-4" />
+                                <p className="text-xs font-bold uppercase tracking-wider">Motivo del Rechazo</p>
+                            </div>
+                            <Textarea
+                                placeholder="Ej: Documentación incompleta, Falta vacante, Datos inconsistentes..."
                                 value={reason}
                                 onChange={(e) => setReason(e.target.value)}
-                                className="border-rose-100 focus-visible:ring-rose-500"
+                                className="bg-white border-rose-200 focus-visible:ring-rose-500 min-h-[100px] resize-none"
                                 autoFocus
                             />
+                            <p className="text-[10px] text-rose-400 font-mediumitalic">Este motivo será guardado en el historial de la inscripción.</p>
                         </div>
                     )}
 

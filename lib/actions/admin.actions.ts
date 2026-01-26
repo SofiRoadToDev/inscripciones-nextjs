@@ -21,7 +21,7 @@ export async function getInscripcionesAdmin(params: {
       *,
       alumno:alumnos(id, nombre, apellido, dni),
       curso:cursos(id, nombre),
-      nivel:niveles(codigo, NIVEL)
+      nivel:niveles(codigo, nivel)
     `, { count: 'exact' });
 
     // Filtros
@@ -150,7 +150,8 @@ export async function getPagosAdmin(params: { search?: string; nivel?: string; p
                 nro_recibo,
                 concepto:conceptos_pago(id, nombre)
             )
-        `, { count: 'exact' });
+        `, { count: 'exact' })
+        .eq('estado', 'aprobada');
 
     if (params.nivel && params.nivel !== 'todos') {
         query = query.eq('nivel_codigo', params.nivel);
@@ -174,52 +175,51 @@ export async function getPagosAdmin(params: { search?: string; nivel?: string; p
 
 export async function registrarPago(params: {
     inscripcionId: string;
-    conceptoId: string;
-    monto: number;
+    pagos: Array<{
+        conceptoId: string;
+        monto: number;
+    }>;
     fechaPago?: string;
     observaciones?: string;
 }) {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
-
-    const { data: existing } = await supabase
-        .from('pagos_inscripcion')
-        .select('id')
-        .eq('inscripcion_id', params.inscripcionId)
-        .eq('concepto_pago_id', params.conceptoId)
-        .single();
-
     const { data: { user } } = await supabase.auth.getUser();
 
-    let error;
-    if (existing) {
-        const { error: updateError } = await supabase
+    for (const pago of params.pagos) {
+        // Check if exists for this specific concepto
+        const { data: existing } = await supabase
             .from('pagos_inscripcion')
-            .update({
-                monto: params.monto,
-                pagado: true,
-                fecha_pago: params.fechaPago || new Date().toISOString(),
-                observaciones: params.observaciones,
-                user_id: user?.id
-            })
-            .eq('id', existing.id);
-        error = updateError;
-    } else {
-        const { error: insertError } = await supabase
-            .from('pagos_inscripcion')
-            .insert({
-                inscripcion_id: params.inscripcionId,
-                concepto_pago_id: params.conceptoId,
-                monto: params.monto,
-                pagado: true,
-                fecha_pago: params.fechaPago || new Date().toISOString(),
-                observaciones: params.observaciones,
-                user_id: user?.id
-            });
-        error = insertError;
-    }
+            .select('id')
+            .eq('inscripcion_id', params.inscripcionId)
+            .eq('concepto_pago_id', pago.conceptoId)
+            .single();
 
-    if (error) return { error: error.message };
+        if (existing) {
+            await supabase
+                .from('pagos_inscripcion')
+                .update({
+                    monto: pago.monto,
+                    pagado: true,
+                    fecha_pago: params.fechaPago || new Date().toISOString(),
+                    observaciones: params.observaciones,
+                    user_id: user?.id
+                })
+                .eq('id', existing.id);
+        } else {
+            await supabase
+                .from('pagos_inscripcion')
+                .insert({
+                    inscripcion_id: params.inscripcionId,
+                    concepto_pago_id: pago.conceptoId,
+                    monto: pago.monto,
+                    pagado: true,
+                    fecha_pago: params.fechaPago || new Date().toISOString(),
+                    observaciones: params.observaciones,
+                    user_id: user?.id
+                });
+        }
+    }
 
     revalidatePath('/admin/tesoreria');
     return { success: true };
