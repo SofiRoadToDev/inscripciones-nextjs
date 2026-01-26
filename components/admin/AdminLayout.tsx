@@ -52,12 +52,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <div className="h-full flex flex-col">
                     <div className="p-8">
                         <div className="flex items-center gap-3">
-                            <div className="relative w-12 h-12">
+                            <div className="flex-shrink-0">
                                 <Image
                                     src="/images/escudo.png"
                                     alt="Escudo Oficial"
-                                    fill
+                                    width={48}
+                                    height={48}
                                     className="object-contain"
+                                    priority
                                 />
                             </div>
                             <div>

@@ -33,6 +33,7 @@ import { getNivelesAction } from '@/lib/actions/catalogo.actions';
 import { cn } from '@/lib/utils';
 import AsignarAlumnosModal from '@/components/admin/AsignarAlumnosModal';
 import CursoAlumnosModal from '@/components/admin/CursoAlumnosModal';
+import { EliminarCursoDialog } from '@/components/admin/EliminarCursoDialog';
 
 export default function ConfigPage() {
     const [conceptos, setConceptos] = useState<any[]>([]);
@@ -42,15 +43,17 @@ export default function ConfigPage() {
     const [savingId, setSavingId] = useState<string | null>(null);
 
     // Form states
-    const [nuevoCurso, setNuevoCurso] = useState({ division: '', nivel: '', turno: '' as any });
+    const [nuevoCurso, setNuevoCurso] = useState({ division: '', nivel: '', turno: '' as any, codigoManual: '' });
     const [isCreatingCurso, setIsCreatingCurso] = useState(false);
 
     // Modal state
     const [selectedCurso, setSelectedCurso] = useState<any | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     useEffect(() => {
+        // ... (resto del useEffect)
         const loadData = async () => {
             setLoading(true);
             const [cRes, cuRes, nRes] = await Promise.all([
@@ -67,6 +70,7 @@ export default function ConfigPage() {
         loadData();
     }, []);
 
+    // ... (otras funciones)
     const handleUpdateMonto = async (id: string, monto: number) => {
         setSavingId(id);
         const res = await updateConceptoMonto(id, monto);
@@ -86,11 +90,12 @@ export default function ConfigPage() {
         const res = await createCurso({
             division: nuevoCurso.division,
             nivelCodigo: nuevoCurso.nivel,
-            turno: nuevoCurso.turno as 'Mañana' | 'Tarde'
+            turno: nuevoCurso.turno as 'Mañana' | 'Tarde',
+            codigoManual: nuevoCurso.codigoManual || undefined
         });
 
         if (res.success) {
-            setNuevoCurso({ division: '', nivel: '', turno: '' as any });
+            setNuevoCurso({ division: '', nivel: '', turno: '' as any, codigoManual: '' });
             const cuRes = await getCursos();
             if (cuRes.data) setCursos(cuRes.data);
         } else {
@@ -99,12 +104,9 @@ export default function ConfigPage() {
         setIsCreatingCurso(false);
     };
 
-    const handleDeleteCurso = async (id: string) => {
-        if (!confirm('¿Seguro que deseas eliminar este curso?')) return;
-        const res = await deleteCurso(id);
-        if (res.success) {
-            setCursos(cursos.filter(c => c.id !== id));
-        }
+    const handleDeleteCurso = (curso: any) => {
+        setSelectedCurso(curso);
+        setIsDeleteModalOpen(true);
     };
 
     const handleExportAlumnos = async (curso: any) => {
@@ -250,6 +252,14 @@ export default function ConfigPage() {
                             <div className="space-y-1 sm:col-span-2">
                                 <label className="text-[10px] font-black uppercase text-primary-400 ml-1">Nuevo Curso Físico</label>
                             </div>
+                            <div className="sm:col-span-2">
+                                <Input
+                                    placeholder="Código Manual (ej: 11CBTM) - Opcional"
+                                    className="bg-white border-primary-100 rounded-xl px-4 py-3 placeholder:text-primary-300"
+                                    value={nuevoCurso.codigoManual}
+                                    onChange={(e) => setNuevoCurso({ ...nuevoCurso, codigoManual: e.target.value })}
+                                />
+                            </div>
                             <select
                                 className="bg-white border border-primary-100 rounded-xl px-4 py-3 text-sm text-primary-900 focus:ring-2 focus:ring-primary-500"
                                 value={nuevoCurso.nivel}
@@ -340,7 +350,7 @@ export default function ConfigPage() {
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            onClick={() => handleDeleteCurso(curso.id)}
+                                            onClick={() => handleDeleteCurso(curso)}
                                             className="text-primary-300 hover:text-rose-500 h-9 w-9 rounded-lg"
                                         >
                                             <Trash2 className="w-4 h-4" />
@@ -367,6 +377,14 @@ export default function ConfigPage() {
                 isOpen={isViewModalOpen}
                 onClose={() => setIsViewModalOpen(false)}
                 curso={selectedCurso}
+            />
+            <EliminarCursoDialog
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                curso={selectedCurso}
+                onSuccess={(id) => {
+                    setCursos(cursos.filter(c => c.id !== id));
+                }}
             />
         </div>
     );

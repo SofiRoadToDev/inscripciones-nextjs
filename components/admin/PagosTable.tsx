@@ -170,37 +170,37 @@ export default function PagosTable() {
                                                 <div className="flex justify-end gap-1">
                                                     <Button
                                                         variant="ghost"
-                                                        size="icon"
-                                                        title="Ver Ficha"
-                                                        className="h-8 w-8 text-primary-400 hover:text-primary-600"
+                                                        size="sm"
+                                                        className="h-14 w-14 flex flex-col items-center justify-center text-primary-400 hover:text-primary-700 hover:bg-primary-100/50 gap-1 cursor-pointer"
                                                         onClick={() => handlePrint('ficha', item)}
                                                     >
                                                         <FileText className="w-4 h-4" />
+                                                        <span className="text-[9px] uppercase font-bold">Ficha</span>
                                                     </Button>
 
                                                     {tienePagos && (
                                                         <Button
                                                             variant="ghost"
-                                                            size="icon"
-                                                            title="Imprimir Recibo"
-                                                            className="h-8 w-8 text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50"
+                                                            size="sm"
+                                                            className="h-14 w-14 flex flex-col items-center justify-center text-emerald-500 hover:text-emerald-700 hover:bg-emerald-100 gap-1 cursor-pointer"
                                                             onClick={() => handlePrint('recibo', item)}
                                                         >
                                                             <Receipt className="w-4 h-4" />
+                                                            <span className="text-[9px] uppercase font-bold">Recibo</span>
                                                         </Button>
                                                     )}
 
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
-                                                        className="h-8 text-primary-600 hover:bg-primary-50 gap-2 px-3"
+                                                        className="h-14 w-14 flex flex-col items-center justify-center text-blue-600 hover:text-blue-800 hover:bg-blue-100 gap-1 cursor-pointer"
                                                         onClick={() => {
                                                             setSelectedInscripcion(item);
                                                             setIsModalOpen(true);
                                                         }}
                                                     >
                                                         <CreditCard className="w-4 h-4" />
-                                                        Cobrar
+                                                        <span className="text-[9px] uppercase font-bold">Cobrar</span>
                                                     </Button>
                                                 </div>
                                             </td>

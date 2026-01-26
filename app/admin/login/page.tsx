@@ -19,12 +19,14 @@ export default function LoginPage() {
 
             <div className="w-full flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-700">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="relative w-24 h-24 mb-2">
+                    <div className="mb-2">
                         <Image
                             src="/images/escudo.png"
                             alt="Escudo Oficial"
-                            fill
+                            width={96}
+                            height={96}
                             className="object-contain"
+                            priority
                         />
                     </div>
                     <div className="text-center space-y-2">

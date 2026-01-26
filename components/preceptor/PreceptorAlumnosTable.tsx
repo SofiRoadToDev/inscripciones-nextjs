@@ -19,11 +19,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { MoveHorizontal, Search, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { MoveHorizontal, Search, ShieldCheck, ShieldAlert, Pencil, Trash2 } from 'lucide-react';
 import { MoverAlumnoModal } from './MoverAlumnoModal';
+import { EditarAlumnoModal } from './EditarAlumnoModal';
+import { EliminarAlumnoDialog } from './EliminarAlumnoDialog';
 
 interface Alumno {
-    id: string;
+    id: string; // ID de inscripción
+    alumnoId?: string; // ID real del alumno
     nombre: string;
     apellido: string;
     dni: string;
@@ -42,7 +45,11 @@ export function PreceptorAlumnosTable({ alumnos, cursos }: PreceptorAlumnosTable
     const [cursoFilter, setCursoFilter] = useState('all');
     const [seguroFilter, setSeguroFilter] = useState('all');
     const [selectedAlumno, setSelectedAlumno] = useState<Alumno | null>(null);
+
+    // Estados para modales
     const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     const filteredAlumnos = alumnos.filter((a) => {
         const matchesSearch =
@@ -63,6 +70,16 @@ export function PreceptorAlumnosTable({ alumnos, cursos }: PreceptorAlumnosTable
     const handleMoveClick = (alumno: Alumno) => {
         setSelectedAlumno(alumno);
         setIsMoveModalOpen(true);
+    };
+
+    const handleEditClick = (alumno: Alumno) => {
+        setSelectedAlumno(alumno);
+        setIsEditModalOpen(true);
+    };
+
+    const handleDeleteClick = (alumno: Alumno) => {
+        setSelectedAlumno(alumno);
+        setIsDeleteModalOpen(true);
     };
 
     return (
@@ -148,15 +165,35 @@ export function PreceptorAlumnosTable({ alumnos, cursos }: PreceptorAlumnosTable
                                         )}
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="text-primary-600 hover:text-primary-700 hover:bg-primary-50 gap-2"
-                                            onClick={() => handleMoveClick(alumno)}
-                                        >
-                                            <MoveHorizontal className="h-4 w-4" />
-                                            Mover
-                                        </Button>
+                                        <div className="flex justify-end gap-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="text-primary-600 hover:text-primary-700 hover:bg-primary-50 gap-2"
+                                                onClick={() => handleMoveClick(alumno)}
+                                            >
+                                                <MoveHorizontal className="h-4 w-4" />
+                                                Mover
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 gap-2"
+                                                onClick={() => handleEditClick(alumno)}
+                                            >
+                                                <Pencil className="h-4 w-4" />
+                                                Editar
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="text-red-600 hover:text-red-700 hover:bg-red-50 gap-2"
+                                                onClick={() => handleDeleteClick(alumno)}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                                Eliminar
+                                            </Button>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))
@@ -171,6 +208,26 @@ export function PreceptorAlumnosTable({ alumnos, cursos }: PreceptorAlumnosTable
                 alumno={selectedAlumno}
                 cursos={cursos}
             />
-        </div>
+
+            <EditarAlumnoModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                alumnoId={selectedAlumno?.alumnoId || null}
+            />
+
+            <EliminarAlumnoDialog
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                alumno={selectedAlumno ? {
+                    inscripcionId: selectedAlumno.id, // OJO: En getAlumnosPreceptorAction, el 'id' retornado es el inscripción_id.
+                    // Verifiquemos en la acción: "id: ins.id" -> SÍ, es ID de inscripción. Correcto.
+                    // Pero para editar necesitamos ID de alumno?? getAlumnoDetalle espera alumnoId.
+                    // Ah, el objeto 'alumno' de la tabla NO TIENE el alumno_id expuesto directamente.
+                    // Tengo que ir a PreceptorAlumnosTable y arreglar la interfaz Alumno.
+                    nombre: selectedAlumno.nombre,
+                    apellido: selectedAlumno.apellido
+                } : null}
+            />
+        </div >
     );
 }

@@ -255,19 +255,27 @@ export async function updateConceptoMonto(id: string, monto: number) {
 export async function createCurso(params: {
     division: string;
     nivelCodigo: string;
-    turno: 'Mañana' | 'Tarde'
+    turno: 'Mañana' | 'Tarde';
+    codigoManual?: string;
 }) {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
-    // Generate technical name: [Anio][Division][NivelCod][Turno]
-    // Anio comes from nivelCodigo (taking the first digits)
-    const anio = params.nivelCodigo.match(/\d+/)?.[0] || '';
-    // Nivel partial (CB or CS)
-    const nivelCod = params.nivelCodigo.includes('Básico') ? 'CB' : 'CS';
-    const turnoCod = params.turno === 'Mañana' ? 'TM' : 'TT';
+    let nombreTecnico = params.codigoManual;
 
-    const nombreTecnico = `${anio}${params.division}${nivelCod}${turnoCod}`;
+    if (!nombreTecnico) {
+        // Generate technical name automatically if manual code is not provided
+        // Anio comes from nivelCodigo (taking the first digits)
+        const anio = params.nivelCodigo.match(/\d+/)?.[0] || '';
+
+        // Nivel partial (CB or CS)
+        // BUG FIX: nivelCodigo is like '1CB', '2CB'. It does NOT contain the full word 'Básico'.
+        // So we check for 'CB' in the code itself.
+        const nivelCod = params.nivelCodigo.includes('CB') ? 'CB' : 'CS';
+
+        const turnoCod = params.turno === 'Mañana' ? 'TM' : 'TT';
+        nombreTecnico = `${anio}${params.division}${nivelCod}${turnoCod}`;
+    }
 
     const { error } = await supabase
         .from('cursos')
@@ -404,4 +412,49 @@ export async function getAlumnosByCurso(cursoId: string) {
 
     if (error) return { error: error.message };
     return { data };
+}
+
+export async function moverAlumnosCurso(origenId: string, destinoId: string) {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    const { error } = await supabase
+        .from('inscripciones')
+        .update({ curso_id: destinoId })
+        .eq('curso_id', origenId);
+
+    if (error) return { error: error.message };
+    revalidatePath('/admin/config');
+    return { success: true };
+}
+
+export async function eliminarAlumnosCurso(cursoId: string) {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    // Borramos pagos asociados primero (para evitar error de FK si no es cascade)
+    // Buscamos inscripciones afectadas
+    const { data: inscripciones } = await supabase
+        .from('inscripciones')
+        .select('id')
+        .eq('curso_id', cursoId);
+
+    if (inscripciones && inscripciones.length > 0) {
+        const ids = inscripciones.map(i => i.id);
+
+        // delete pagos
+        await supabase.from('pagos_inscripcion').delete().in('inscripcion_id', ids);
+
+        // delete tutores (many-to-many link)
+        await supabase.from('inscripciones_tutores').delete().in('inscripcion_id', ids);
+    }
+
+    const { error } = await supabase
+        .from('inscripciones')
+        .delete()
+        .eq('curso_id', cursoId);
+
+    if (error) return { error: error.message };
+    revalidatePath('/admin/config');
+    return { success: true };
 }

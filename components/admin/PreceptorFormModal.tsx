@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
     crearPreceptorAction,
-    actualizarCursosPreceptorAction,
+    actualizarPreceptorAction,
 } from '@/lib/actions/preceptor.actions';
 import { toast } from 'sonner';
 
@@ -31,8 +31,8 @@ const preceptorSchema = z.object({
     nombre: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
     apellido: z.string().min(3, 'El apellido debe tener al menos 3 caracteres'),
     dni: z.string().min(7, 'DNI inválido (mínimo 7 caracteres)'),
-    email: z.string().email('Email inválido'),
-    password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').optional(),
+    email: z.string().email('Email inválido').optional().or(z.literal('')),
+    password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').optional().or(z.literal('')),
     cursoIds: z.array(z.string()).min(1, 'Debe asignar al menos un curso'),
 });
 
@@ -105,23 +105,34 @@ export function PreceptorFormModal({
         setIsSubmitting(true);
 
         try {
-            if (isEditing) {
-                // Solo actualizar cursos
-                const result = await actualizarCursosPreceptorAction(
+            if (isEditing && preceptor) {
+                // Actualizar preceptor completo
+                const result = await actualizarPreceptorAction(
                     preceptor.id,
-                    data.cursoIds
+                    {
+                        cursoIds: data.cursoIds,
+                        nombre: data.nombre,
+                        apellido: data.apellido,
+                        dni: data.dni
+                    }
                 );
 
                 if (result.error) {
                     toast.error(result.error);
                 } else {
-                    toast.success('Cursos actualizados correctamente');
+                    toast.success('Preceptor actualizado correctamente');
                     onClose();
                 }
             } else {
                 // Crear nuevo preceptor
+                // Validación manual para campos requeridos solo en creación
+                if (!data.email) {
+                    form.setError('email', { message: 'El email es requerido' });
+                    setIsSubmitting(false);
+                    return;
+                }
                 if (!data.password) {
-                    toast.error('La contraseña es requerida');
+                    form.setError('password', { message: 'La contraseña es requerida' });
                     setIsSubmitting(false);
                     return;
                 }
@@ -169,7 +180,7 @@ export function PreceptorFormModal({
                                     <FormItem>
                                         <FormLabel>Nombre</FormLabel>
                                         <FormControl>
-                                            <Input {...field} disabled={isEditing} />
+                                            <Input {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -183,7 +194,7 @@ export function PreceptorFormModal({
                                     <FormItem>
                                         <FormLabel>Apellido</FormLabel>
                                         <FormControl>
-                                            <Input {...field} disabled={isEditing} />
+                                            <Input {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -198,7 +209,7 @@ export function PreceptorFormModal({
                                 <FormItem>
                                     <FormLabel>DNI</FormLabel>
                                     <FormControl>
-                                        <Input {...field} disabled={isEditing} />
+                                        <Input {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
