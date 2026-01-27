@@ -1,7 +1,7 @@
 import InscripcionTabs from '@/components/forms/InscripcionTabs'
 
 export const metadata = {
-    title: 'Inscripción | Colegio San Patricio',
+    title: 'Preinscripción 2026 | EET 3107',
     description: 'Formulario de inscripción para el ciclo lectivo.',
 }
 

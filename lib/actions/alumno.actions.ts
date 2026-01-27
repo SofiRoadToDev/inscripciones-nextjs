@@ -10,7 +10,7 @@ export async function buscarAlumnoPorDniAction(dni: string) {
                 apellido: "Mockington",
                 nombre: "Testy",
                 dni: "12345678",
-                fecha_nacimiento: "01/01/2015",
+                fecha_nacimiento: "2015-01-01",
                 nacionalidad: "Argentina",
                 genero: "Masculino" as const,
                 email: "test@mock.com",
@@ -98,7 +98,7 @@ export async function buscarAlumnoPorDniAction(dni: string) {
                     apellido: alumno.apellido,
                     nombre: alumno.nombre,
                     dni: alumno.dni,
-                    fecha_nacimiento: new Date(alumno.fecha_nacimiento + 'T00:00:00').toLocaleDateString('es-AR'),
+                    fecha_nacimiento: alumno.fecha_nacimiento, // YYYY-MM-DD nativo de Postgres
                     nacionalidad: alumno.nacionalidad,
                     genero: alumno.genero as 'Masculino' | 'Femenino' | 'Otro',
                     email: alumno.email || '',
@@ -125,7 +125,7 @@ export async function buscarAlumnoPorDniAction(dni: string) {
                 apellido: alumno.apellido,
                 nombre: alumno.nombre,
                 dni: alumno.dni,
-                fecha_nacimiento: new Date(alumno.fecha_nacimiento + 'T00:00:00').toLocaleDateString('es-AR'),
+                fecha_nacimiento: alumno.fecha_nacimiento, // YYYY-MM-DD nativo de Postgres
                 nacionalidad: alumno.nacionalidad,
                 genero: alumno.genero as 'Masculino' | 'Femenino' | 'Otro',
                 email: alumno.email || '',

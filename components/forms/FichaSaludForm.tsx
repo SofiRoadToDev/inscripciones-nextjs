@@ -47,6 +47,7 @@ export default function FichaSaludForm({ onNext, onBack, isSubmitting = false }:
             discapacidad: '',
             medicamentos: '',
             vacunacion_completa: false,
+            certificado_salud: false,
             cud: false,
             observaciones: '',
         },

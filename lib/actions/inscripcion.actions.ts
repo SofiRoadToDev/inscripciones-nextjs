@@ -23,6 +23,19 @@ export async function registrarInscripcionAction(allFormData: FormData) {
 }
 
 /**
+ * Verifica si un alumno ya está inscrito en un ciclo lectivo
+ */
+export async function verificarInscripcionExistenteAction(dni: string, cicloLectivo: string) {
+    try {
+        const exists = await inscripcionesService.checkExistingInscripcion(dni, cicloLectivo);
+        return { success: true, exists };
+    } catch (error) {
+        console.error('Error in verificarInscripcionExistenteAction:', error);
+        return { success: false, error: "No se pudo verificar la inscripción previa." };
+    }
+}
+
+/**
  * Parsea fecha de DD/MM/YYYY a YYYY-MM-DD para Postgres
  */
 function parseFecha(fechaStr: string): string {

@@ -4,6 +4,30 @@ import { InscripcionCompleta } from '@/lib/types/inscripciones';
 export class InscripcionesService {
 
     /**
+     * Verifica si ya existe una inscripción para un alumno y ciclo lectivo específicos.
+     */
+    async checkExistingInscripcion(dni: string, cicloLectivo: string): Promise<boolean> {
+        const supabase = createAdminClient();
+
+        // Buscamos inscripciones que pertenezcan a un alumno con el DNI dado en el ciclo indicado
+        const { data, error } = await supabase
+            .from('inscripciones')
+            .select(`
+                id,
+                alumnos!inner(dni)
+            `)
+            .eq('alumnos.dni', dni)
+            .eq('ciclo_lectivo', cicloLectivo);
+
+        if (error) {
+            console.error('Error checking existing inscripcion:', error);
+            return false;
+        }
+
+        return data.length > 0;
+    }
+
+    /**
      * Recupera una inscripción completa por su ID, incluyendo todas las relaciones anidadas
      * (Alumno, Domicilio completo, Tutores con sus domicilios, Ficha de Salud).
      */

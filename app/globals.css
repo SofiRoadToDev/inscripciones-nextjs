@@ -161,6 +161,10 @@ body {
     @apply bg-background text-foreground min-h-screen relative;
   }
 
+  button {
+    @apply cursor-pointer;
+  }
+
   /* Fondo decorativo delicado solo para pantallas grandes */
   @media (min-width: 768px) {
     body::before {

@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { inscripcionSchema, type InscripcionFormData } from '@/lib/validations/inscripcion.schema'
 import { formStorageService } from '@/lib/services/form-storage.service'
+import { verificarInscripcionExistenteAction } from '@/lib/actions/inscripcion.actions'
 import { useNiveles } from '@/hooks/useNiveles'
 import { useCursos } from '@/hooks/useCursos'
 import {
@@ -36,6 +37,7 @@ import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 interface InscripcionFormProps {
     onSubmit: (data: InscripcionFormData) => void
@@ -45,6 +47,7 @@ interface InscripcionFormProps {
 
 export default function InscripcionForm({ onSubmit, onBack, isSubmitting = false }: InscripcionFormProps) {
     const currentYear = new Date().getFullYear().toString()
+    const [localError, setLocalError] = useState<string | null>(null)
 
     const form = useForm<InscripcionFormData>({
         resolver: zodResolver(inscripcionSchema),
@@ -54,6 +57,8 @@ export default function InscripcionForm({ onSubmit, onBack, isSubmitting = false
             repite: false,
             materias_pendientes: '',
             escuela_procedencia: '',
+            documentacion_completa: false,
+            observaciones: '',
         },
     })
 
@@ -84,9 +89,34 @@ export default function InscripcionForm({ onSubmit, onBack, isSubmitting = false
         return () => subscription.unsubscribe()
     }, [watch])
 
+    const handleFinalSubmit = async (data: InscripcionFormData) => {
+        setLocalError(null)
+
+        try {
+            // Buscamos el DNI del alumno en localStorage
+            const savedAlumno = formStorageService.getTabData('alumno')
+            if (!savedAlumno?.dni) {
+                setLocalError("No se encontró el DNI del alumno para validar.")
+                return
+            }
+
+            // Ultima verificación de duplicado (por si cambió el ciclo aquí)
+            const check = await verificarInscripcionExistenteAction(savedAlumno.dni, data.ciclo_lectivo)
+
+            if (check.success && check.exists) {
+                setLocalError(`El alumno ya posee una inscripción registrada para el ciclo ${data.ciclo_lectivo}.`)
+                return
+            }
+
+            onSubmit(data)
+        } catch (error) {
+            setLocalError("Ocurrió un error al procesar la inscripción.")
+        }
+    }
+
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={form.handleSubmit(handleFinalSubmit)} className="space-y-8">
                 <Card className="border-neutral-200 shadow-sm overflow-hidden group transition-all hover:shadow-md">
                     <CardHeader className="bg-neutral-50 border-b border-neutral-100 flex flex-row items-center justify-between py-4">
                         <div className="flex items-center gap-3">
@@ -117,7 +147,7 @@ export default function InscripcionForm({ onSubmit, onBack, isSubmitting = false
                                             <FormLabel>Ciclo Lectivo</FormLabel>
                                         </div>
                                         <FormControl>
-                                            <Input {...field} readOnly className="bg-neutral-50 cursor-not-allowed" />
+                                            <Input {...field} className="bg-white" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -235,6 +265,14 @@ export default function InscripcionForm({ onSubmit, onBack, isSubmitting = false
                         </div>
                     </CardContent>
                 </Card>
+
+                {localError && (
+                    <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-2 border-3 border-amber-500 bg-amber-50 text-amber-900 shadow-lg">
+                        <AlertTriangle className="h-4 w-4 text-amber-600" />
+                        <AlertTitle className="font-bold">Error de Validación</AlertTitle>
+                        <AlertDescription className="font-medium">{localError}</AlertDescription>
+                    </Alert>
+                )}
 
                 <div className="flex justify-between pt-8">
                     <Button

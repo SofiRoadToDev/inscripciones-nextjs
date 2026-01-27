@@ -33,7 +33,7 @@ export default function Hero() {
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500">
                     <Link href="/inscripcion">
-                        <Button size="lg" className="h-16 px-10 bg-white text-primary-950 hover:bg-primary-50 rounded-2xl text-base font-bold shadow-2xl hover:shadow-white/20 transition-all active:scale-95 group">
+                        <Button size="lg" className="cursor-pointer h-16 px-10 bg-white text-primary-950 hover:bg-primary-50 rounded-2xl text-base font-bold shadow-2xl hover:shadow-white/20 transition-all active:scale-95 group">
                             INICIAR INSCRIPCIÓN
                             <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </Button>

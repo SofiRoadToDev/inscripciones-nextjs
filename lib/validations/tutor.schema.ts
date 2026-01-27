@@ -15,15 +15,33 @@ export const tutorSchema = z.object({
     // Domicilio del tutor
     mismo_domicilio_alumno: z.boolean(),
     domicilio: z.object({
-        calle: z.string().min(3, 'La calle es obligatoria'),
-        numero: z.string().min(1, 'El número es obligatorio'),
+        calle: z.string().optional().or(z.literal('')),
+        numero: z.string().optional().or(z.literal('')),
         piso_depto: z.string().optional().or(z.literal('')),
         casa_lote: z.string().optional().or(z.literal('')),
         barrio_manzana_block: z.string().optional().or(z.literal('')),
-        provincia_id: z.string().uuid('Debe seleccionar una provincia'),
-        departamento_id: z.string().uuid('Debe seleccionar un departamento'),
-        localidad_id: z.string().uuid('Debe seleccionar una localidad'),
+        provincia_id: z.string().optional().or(z.literal('')),
+        departamento_id: z.string().optional().or(z.literal('')),
+        localidad_id: z.string().optional().or(z.literal('')),
     }).optional()
+}).superRefine((data, ctx) => {
+    if (!data.mismo_domicilio_alumno && data.domicilio) {
+        if (!data.domicilio.calle || data.domicilio.calle.length < 3) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: "La calle es obligatoria", path: ['domicilio', 'calle'] });
+        }
+        if (!data.domicilio.numero || data.domicilio.numero.length < 1) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: "El número es obligatorio", path: ['domicilio', 'numero'] });
+        }
+        if (!data.domicilio.provincia_id || data.domicilio.provincia_id === '') {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Debe seleccionar una provincia", path: ['domicilio', 'provincia_id'] });
+        }
+        if (!data.domicilio.departamento_id || data.domicilio.departamento_id === '') {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Debe seleccionar un departamento", path: ['domicilio', 'departamento_id'] });
+        }
+        if (!data.domicilio.localidad_id || data.domicilio.localidad_id === '') {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Debe seleccionar una localidad", path: ['domicilio', 'localidad_id'] });
+        }
+    }
 })
 
 export const tutoresPageSchema = z.object({

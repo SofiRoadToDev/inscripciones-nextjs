@@ -7,8 +7,7 @@ export const alumnoSchema = z.object({
     dni: z.string()
         .regex(/^\d{7,8}$/, 'El DNI debe tener 7 u 8 dígitos')
         .transform(val => val.trim()),
-    fecha_nacimiento: z.string()
-        .regex(/^\d{2}\/\d{2}\/\d{4}$/, 'Formato de fecha inválido (dd/mm/yyyy)'),
+    fecha_nacimiento: z.string().min(1, 'La fecha de nacimiento es obligatoria'),
     nacionalidad: z.string().min(2, 'La nacionalidad es obligatoria'),
     genero: z.enum(['Masculino', 'Femenino', 'Otro']),
     foto_url: z.string().optional(),

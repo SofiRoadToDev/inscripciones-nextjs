@@ -18,6 +18,14 @@ export default function InscripcionTabs() {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState(false)
+    const [resetKey, setResetKey] = useState(0)
+
+    const handleNewInscripcion = () => {
+        setSuccess(false)
+        setActiveTab('alumno')
+        setResetKey(prev => prev + 1)
+        formStorageService.clearFormData()
+    }
 
     const handleFinalSubmit = async () => {
         setIsSubmitting(true)
@@ -63,8 +71,8 @@ export default function InscripcionTabs() {
                     </p>
                     <div className="pt-8">
                         <Button
-                            onClick={() => window.location.reload()}
-                            className="bg-primary-600 hover:bg-primary-700 text-white gap-2"
+                            onClick={handleNewInscripcion}
+                            className="cursor-pointer bg-primary-500 hover:bg-primary-600 text-white gap-2"
                         >
                             <RefreshCw className="w-4 h-4" />
                             Nueva Inscripción
@@ -111,31 +119,33 @@ export default function InscripcionTabs() {
                 </TabsList>
 
                 <Card className="p-8">
-                    <TabsContent value="alumno" className="mt-0">
-                        <AlumnoForm onNext={() => setActiveTab('tutores')} />
-                    </TabsContent>
+                    <div key={resetKey}>
+                        <TabsContent value="alumno" className="mt-0">
+                            <AlumnoForm onNext={() => setActiveTab('tutores')} />
+                        </TabsContent>
 
-                    <TabsContent value="tutores" className="mt-0">
-                        <TutoresForm
-                            onNext={() => setActiveTab('salud')}
-                            onBack={() => setActiveTab('alumno')}
-                        />
-                    </TabsContent>
+                        <TabsContent value="tutores" className="mt-0">
+                            <TutoresForm
+                                onNext={() => setActiveTab('salud')}
+                                onBack={() => setActiveTab('alumno')}
+                            />
+                        </TabsContent>
 
-                    <TabsContent value="salud" className="mt-0">
-                        <FichaSaludForm
-                            onNext={() => setActiveTab('inscripcion')}
-                            onBack={() => setActiveTab('tutores')}
-                        />
-                    </TabsContent>
+                        <TabsContent value="salud" className="mt-0">
+                            <FichaSaludForm
+                                onNext={() => setActiveTab('inscripcion')}
+                                onBack={() => setActiveTab('tutores')}
+                            />
+                        </TabsContent>
 
-                    <TabsContent value="inscripcion" className="mt-0">
-                        <InscripcionForm
-                            onSubmit={handleFinalSubmit}
-                            onBack={() => setActiveTab('salud')}
-                            isSubmitting={isSubmitting}
-                        />
-                    </TabsContent>
+                        <TabsContent value="inscripcion" className="mt-0">
+                            <InscripcionForm
+                                onSubmit={handleFinalSubmit}
+                                onBack={() => setActiveTab('salud')}
+                                isSubmitting={isSubmitting}
+                            />
+                        </TabsContent>
+                    </div>
                 </Card>
             </Tabs>
         </div>

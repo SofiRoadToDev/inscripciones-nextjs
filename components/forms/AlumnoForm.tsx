@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { alumnoSchema, type AlumnoFormData } from '@/lib/validations/alumno.schema'
 import { formStorageService } from '@/lib/services/form-storage.service'
 import { buscarAlumnoPorDniAction } from '@/lib/actions/alumno.actions'
+import { verificarInscripcionExistenteAction } from '@/lib/actions/inscripcion.actions'
 import { useProvincias } from '@/hooks/useProvincias'
 import { useDepartamentos } from '@/hooks/useDepartamentos'
 import { useLocalidades } from '@/hooks/useLocalidades'
@@ -132,9 +133,33 @@ export default function AlumnoForm({ onNext }: AlumnoFormProps) {
         }
     }
 
-    const onSubmit = (data: AlumnoFormData) => {
-        console.log('Alumno data:', data)
-        onNext()
+    const onSubmit = async (data: AlumnoFormData) => {
+        setIsSearching(true)
+        setSearchInfo(null)
+
+        try {
+            // Obtener el ciclo lectivo actual o el guardado en la tab de inscripción
+            const savedInscripcion = formStorageService.getTabData('inscripcion')
+            const cicloLectivo = savedInscripcion?.ciclo_lectivo || new Date().getFullYear().toString()
+
+            const result = await verificarInscripcionExistenteAction(data.dni, cicloLectivo)
+
+            if (result.success && result.exists) {
+                setSearchInfo({
+                    type: 'error',
+                    message: `El alumno con DNI ${data.dni} ya posee una inscripción registrada para el ciclo lectivo ${cicloLectivo}.`
+                })
+                return
+            }
+
+            console.log('Alumno data:', data)
+            onNext()
+        } catch (error) {
+            console.error('Validation error:', error)
+            setSearchInfo({ type: 'error', message: 'Error al validar la inscripción. Intente nuevamente.' })
+        } finally {
+            setIsSearching(false)
+        }
     }
 
     return (
@@ -177,15 +202,23 @@ export default function AlumnoForm({ onNext }: AlumnoFormProps) {
                     </div>
 
                     {searchInfo && (
-                        <Alert variant={searchInfo.type === 'success' ? 'default' : 'destructive'}
-                            className={searchInfo.type === 'success' ? 'border-primary-200 bg-white' : ''}>
+                        <Alert
+                            variant={searchInfo.type === 'success' ? 'default' : 'destructive'}
+                            className={searchInfo.type === 'success'
+                                ? 'border-3 border-accent-500 bg-accent-50 text-accent-900 shadow-md animate-in fade-in slide-in-from-top-2'
+                                : 'border-3 border-amber-500 bg-amber-50 text-amber-900 shadow-md animate-in fade-in slide-in-from-top-2'}
+                        >
                             {searchInfo.type === 'success' ? (
-                                <CheckCircle2 className="h-4 w-4 text-primary-500" />
+                                <CheckCircle2 className="h-4 w-4 text-accent-600" />
                             ) : (
-                                <AlertCircle className="h-4 w-4" />
+                                <AlertCircle className="h-4 w-4 text-amber-600" />
                             )}
-                            <AlertTitle>{searchInfo.type === 'success' ? '¡Éxito!' : 'Aviso'}</AlertTitle>
-                            <AlertDescription>{searchInfo.message}</AlertDescription>
+                            <AlertTitle className="font-bold">
+                                {searchInfo.type === 'success' ? '¡Éxito!' : 'Aviso'}
+                            </AlertTitle>
+                            <AlertDescription className="font-medium">
+                                {searchInfo.message}
+                            </AlertDescription>
                         </Alert>
                     )}
                 </div>
@@ -247,7 +280,7 @@ export default function AlumnoForm({ onNext }: AlumnoFormProps) {
                                         <FormItem>
                                             <FormLabel>Fecha de Nacimiento</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="dd/mm/aaaa" {...field} />
+                                                <Input type="date" className="block w-full" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -501,7 +534,7 @@ export default function AlumnoForm({ onNext }: AlumnoFormProps) {
                     </div>
 
                     <div className="flex justify-end pt-6">
-                        <Button type="submit" size="lg" className="bg-primary-500 hover:bg-primary-600 text-white px-8">
+                        <Button type="submit" size="lg" className="cursor-pointer bg-primary-500 hover:bg-primary-600 text-white px-8">
                             Siguiente Paso
                         </Button>
                     </div>

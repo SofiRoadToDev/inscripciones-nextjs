@@ -119,8 +119,6 @@ export default function PagosTable() {
                         onChange={(e) => setNivel(e.target.value)}
                     >
                         <option value="todos">Todos los niveles</option>
-                        <option value="PRI">Primaria</option>
-                        <option value="SEC">Secundaria</option>
                     </select>
                 </div>
             </div>

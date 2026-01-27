@@ -6,7 +6,7 @@ export const inscripcionSchema = z.object({
     repite: z.boolean(),
     materias_pendientes: z.string().optional().or(z.literal('')),
     escuela_procedencia: z.string().optional().or(z.literal('')),
-    documentacion_completa: z.boolean().default(false),
+    documentacion_completa: z.boolean(),
     observaciones: z.string().optional().or(z.literal('')),
 })
 
