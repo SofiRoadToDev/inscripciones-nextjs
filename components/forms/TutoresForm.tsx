@@ -200,15 +200,18 @@ function TutorCard({ index, remove, form, provincias }: {
                     </div>
                 </div>
                 {remove && (
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={remove}
-                        className="text-neutral-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                    >
-                        <Trash2 className="w-5 h-5" />
-                    </Button>
+                    <div className="flex flex-col items-center">
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={remove}
+                            className="text-neutral-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                        >
+                            <Trash2 className="w-5 h-5" />
+                        </Button>
+                        <span className="text-[10px] text-neutral-400 mt-1 font-medium">Borrar</span>
+                    </div>
                 )}
             </CardHeader>
             <CardContent className="p-6 space-y-8">
@@ -227,7 +230,7 @@ function TutorCard({ index, remove, form, provincias }: {
                                 <FormItem>
                                     <FormLabel>Apellido</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Ej: Perez" {...field} />
+                                        <Input autoCapitalize="words" placeholder="Ej: Perez" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -240,7 +243,7 @@ function TutorCard({ index, remove, form, provincias }: {
                                 <FormItem>
                                     <FormLabel>Nombre</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Ej: Juan Carlos" {...field} />
+                                        <Input autoCapitalize="words" placeholder="Ej: Juan Carlos" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -256,7 +259,7 @@ function TutorCard({ index, remove, form, provincias }: {
                                 <FormItem>
                                     <FormLabel>DNI</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Sin puntos" {...field} />
+                                        <Input type="tel" placeholder="Sin puntos" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -295,7 +298,7 @@ function TutorCard({ index, remove, form, provincias }: {
                                     <FormControl>
                                         <div className="relative">
                                             <Phone className="absolute left-3 top-2.5 h-4 w-4 text-neutral-400" />
-                                            <Input className="pl-10" placeholder="+54 9 387 ..." {...field} />
+                                            <Input type="tel" className="pl-10" placeholder="+54 9 387 ..." {...field} />
                                         </div>
                                     </FormControl>
                                     <FormMessage />
@@ -410,7 +413,7 @@ function TutorCard({ index, remove, form, provincias }: {
                                         <FormItem>
                                             <FormLabel>Número</FormLabel>
                                             <FormControl>
-                                                <Input {...field} />
+                                                <Input type="tel" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>

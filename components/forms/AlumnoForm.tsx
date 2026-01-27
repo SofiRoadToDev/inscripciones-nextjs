@@ -26,6 +26,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import { DateSelector } from '@/components/ui/date-selector'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Card } from "@/components/ui/card"
 
@@ -238,7 +239,7 @@ export default function AlumnoForm({ onNext }: AlumnoFormProps) {
                                         <FormItem>
                                             <FormLabel>Apellido</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Ej: Perez" {...field} />
+                                                <Input autoCapitalize="words" placeholder="Ej: Perez" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -251,7 +252,7 @@ export default function AlumnoForm({ onNext }: AlumnoFormProps) {
                                         <FormItem>
                                             <FormLabel>Nombre</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Ej: Juan" {...field} />
+                                                <Input autoCapitalize="words" placeholder="Ej: Juan" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -264,7 +265,7 @@ export default function AlumnoForm({ onNext }: AlumnoFormProps) {
                                         <FormItem>
                                             <FormLabel>DNI</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Sin puntos" {...field} />
+                                                <Input type="tel" placeholder="Sin puntos" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -277,10 +278,13 @@ export default function AlumnoForm({ onNext }: AlumnoFormProps) {
                                     control={form.control}
                                     name="fecha_nacimiento"
                                     render={({ field }) => (
-                                        <FormItem>
+                                        <FormItem className="flex flex-col">
                                             <FormLabel>Fecha de Nacimiento</FormLabel>
                                             <FormControl>
-                                                <Input type="date" className="block w-full" {...field} />
+                                                <DateSelector
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -383,7 +387,7 @@ export default function AlumnoForm({ onNext }: AlumnoFormProps) {
                                         <FormItem>
                                             <FormLabel>Número</FormLabel>
                                             <FormControl>
-                                                <Input {...field} />
+                                                <Input type="tel" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>

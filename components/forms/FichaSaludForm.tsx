@@ -15,8 +15,10 @@ import {
     ChevronLeft,
     ChevronRight,
     Check,
-    CheckCircle2
+    CheckCircle2,
+    X
 } from 'lucide-react'
+import { QuickNoneButton } from './QuickNoneButton'
 import {
     Form,
     FormControl,
@@ -104,7 +106,8 @@ export default function FichaSaludForm({ onNext, onBack, isSubmitting = false }:
                                     <FormItem className="space-y-3">
                                         <div className="flex items-center gap-2 text-primary-800">
                                             <Activity className="w-4 h-4" />
-                                            <FormLabel className="text-base">Enfermedades Crónicas</FormLabel>
+                                            <FormLabel className="text-base flex-1">Enfermedades Crónicas</FormLabel>
+                                            <QuickNoneButton value={field.value || ''} onChange={field.onChange} />
                                         </div>
                                         <FormControl>
                                             <Textarea
@@ -126,7 +129,8 @@ export default function FichaSaludForm({ onNext, onBack, isSubmitting = false }:
                                     <FormItem className="space-y-3">
                                         <div className="flex items-center gap-2 text-primary-800">
                                             <AlertCircle className="w-4 h-4" />
-                                            <FormLabel className="text-base">Alergias</FormLabel>
+                                            <FormLabel className="text-base flex-1">Alergias</FormLabel>
+                                            <QuickNoneButton value={field.value || ''} onChange={field.onChange} />
                                         </div>
                                         <FormControl>
                                             <Textarea
@@ -148,7 +152,8 @@ export default function FichaSaludForm({ onNext, onBack, isSubmitting = false }:
                                     <FormItem className="space-y-3">
                                         <div className="flex items-center gap-2 text-primary-800">
                                             <Badge variant="outline" className="h-5 p-1 border-primary-500 text-primary-500">!</Badge>
-                                            <FormLabel className="text-base">Discapacidad</FormLabel>
+                                            <FormLabel className="text-base flex-1">Discapacidad</FormLabel>
+                                            <QuickNoneButton value={field.value || ''} onChange={field.onChange} />
                                         </div>
                                         <FormControl>
                                             <Textarea
@@ -170,7 +175,8 @@ export default function FichaSaludForm({ onNext, onBack, isSubmitting = false }:
                                     <FormItem className="space-y-3">
                                         <div className="flex items-center gap-2 text-primary-800">
                                             <Pill className="w-4 h-4" />
-                                            <FormLabel className="text-base">Medicamentos</FormLabel>
+                                            <FormLabel className="text-base flex-1">Medicamentos</FormLabel>
+                                            <QuickNoneButton value={field.value || ''} onChange={field.onChange} />
                                         </div>
                                         <FormControl>
                                             <Textarea
