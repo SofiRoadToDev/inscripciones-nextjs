@@ -228,7 +228,7 @@ export default function InscripcionForm({ onSubmit, onBack, isSubmitting = false
                                             <FormLabel className="text-sm font-medium text-primary-800">Materias Pendientes / Previas</FormLabel>
                                             <FormControl>
                                                 <Textarea
-                                                    placeholder="Si posee materias de años anteriores sin aprobar, detállalas aquí."
+                                                    placeholder="Si posee materias de años anteriores sin aprobar, detállalas aquí. Deje en blanco si no aplica."
                                                     className="min-h-[100px] resize-none"
                                                     {...field}
                                                 />

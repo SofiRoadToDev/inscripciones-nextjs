@@ -12,6 +12,7 @@ import { formStorageService } from '@/lib/services/form-storage.service'
 import { CheckCircle, AlertCircle, RefreshCw } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
 
 export default function InscripcionTabs() {
     const [activeTab, setActiveTab] = useState('alumno')
@@ -20,11 +21,17 @@ export default function InscripcionTabs() {
     const [success, setSuccess] = useState(false)
     const [resetKey, setResetKey] = useState(0)
 
+    const router = useRouter()
+
     const handleNewInscripcion = () => {
         setSuccess(false)
         setActiveTab('alumno')
         setResetKey(prev => prev + 1)
         formStorageService.clearFormData()
+    }
+
+    const returnToHome = () => {
+        router.push('/')
     }
 
     const handleFinalSubmit = async () => {
@@ -71,11 +78,11 @@ export default function InscripcionTabs() {
                     </p>
                     <div className="pt-8">
                         <Button
-                            onClick={handleNewInscripcion}
+                            onClick={returnToHome}
                             className="cursor-pointer bg-primary-500 hover:bg-primary-600 text-white gap-2"
                         >
                             <RefreshCw className="w-4 h-4" />
-                            Nueva Inscripción
+                            Volver a la página principal
                         </Button>
                     </div>
                 </Card>

@@ -18,7 +18,7 @@ import {
     CheckCircle2,
     X
 } from 'lucide-react'
-import { QuickNoneButton } from './QuickNoneButton'
+
 import {
     Form,
     FormControl,
@@ -107,11 +107,10 @@ export default function FichaSaludForm({ onNext, onBack, isSubmitting = false }:
                                         <div className="flex items-center gap-2 text-primary-800">
                                             <Activity className="w-4 h-4" />
                                             <FormLabel className="text-base flex-1">Enfermedades Crónicas</FormLabel>
-                                            <QuickNoneButton value={field.value || ''} onChange={field.onChange} />
                                         </div>
                                         <FormControl>
                                             <Textarea
-                                                placeholder="Describa si padece asma, diabetes, problemas cardíacos, etc. (O escriba 'Ninguna')"
+                                                placeholder="Describa si padece asma, diabetes, problemas cardíacos, etc. Deje en blanco si no aplica."
                                                 className="min-h-[100px] resize-none"
                                                 {...field}
                                             />
@@ -130,11 +129,10 @@ export default function FichaSaludForm({ onNext, onBack, isSubmitting = false }:
                                         <div className="flex items-center gap-2 text-primary-800">
                                             <AlertCircle className="w-4 h-4" />
                                             <FormLabel className="text-base flex-1">Alergias</FormLabel>
-                                            <QuickNoneButton value={field.value || ''} onChange={field.onChange} />
                                         </div>
                                         <FormControl>
                                             <Textarea
-                                                placeholder="Indique medicamentos, alimentos o elementos ambientales. (O escriba 'Ninguna')"
+                                                placeholder="Indique medicamentos, alimentos o elementos ambientales. Deje en blanco si no aplica."
                                                 className="min-h-[100px] resize-none"
                                                 {...field}
                                             />
@@ -153,11 +151,10 @@ export default function FichaSaludForm({ onNext, onBack, isSubmitting = false }:
                                         <div className="flex items-center gap-2 text-primary-800">
                                             <Badge variant="outline" className="h-5 p-1 border-primary-500 text-primary-500">!</Badge>
                                             <FormLabel className="text-base flex-1">Discapacidad</FormLabel>
-                                            <QuickNoneButton value={field.value || ''} onChange={field.onChange} />
                                         </div>
                                         <FormControl>
                                             <Textarea
-                                                placeholder="Detalle si posee alguna discapacidad o condición que requiera atención especial."
+                                                placeholder="Detalle si posee alguna discapacidad o condición que requiera atención especial. Deje en blanco si no aplica."
                                                 className="min-h-[100px] resize-none"
                                                 {...field}
                                             />
@@ -176,11 +173,10 @@ export default function FichaSaludForm({ onNext, onBack, isSubmitting = false }:
                                         <div className="flex items-center gap-2 text-primary-800">
                                             <Pill className="w-4 h-4" />
                                             <FormLabel className="text-base flex-1">Medicamentos</FormLabel>
-                                            <QuickNoneButton value={field.value || ''} onChange={field.onChange} />
                                         </div>
                                         <FormControl>
                                             <Textarea
-                                                placeholder="Indique si recibe medicación de forma habitual y su administración."
+                                                placeholder="Indique si recibe medicación de forma habitual y su administración. Deje en blanco si no aplica."
                                                 className="min-h-[100px] resize-none"
                                                 {...field}
                                             />
@@ -258,7 +254,7 @@ export default function FichaSaludForm({ onNext, onBack, isSubmitting = false }:
                                     </div>
                                     <FormControl>
                                         <Textarea
-                                            placeholder="Cualquier otra información que considere relevante para el bienestar del alumno."
+                                            placeholder="Cualquier otra información que considere relevante para el bienestar del alumno. Deje en blanco si no aplica."
                                             className="min-h-[80px]"
                                             {...field}
                                         />
