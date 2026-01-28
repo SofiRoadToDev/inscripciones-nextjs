@@ -12,6 +12,7 @@ export default async function PreceptorAlumnosPage(props: {
         seguro?: string;
         docRel?: string;
         salud?: string;
+        repitente?: string;
     }>
 }) {
     const searchParams = await props.searchParams;
@@ -25,7 +26,8 @@ export default async function PreceptorAlumnosPage(props: {
         cursoId: searchParams.cursoId,
         seguro: searchParams.seguro,
         docRel: searchParams.docRel,
-        salud: searchParams.salud
+        salud: searchParams.salud,
+        repitente: searchParams.repitente
     });
 
     if (result.error) {

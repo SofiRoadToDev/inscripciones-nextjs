@@ -437,6 +437,7 @@ export async function getAlumnosPreceptorAction(params: {
     seguro?: string;
     docRel?: string;
     salud?: string;
+    repitente?: string;
 }) {
     try {
         const profile = await requireRole('preceptor');
@@ -476,6 +477,7 @@ export async function getAlumnosPreceptorAction(params: {
                 estado,
                 ciclo_lectivo,
                 documentacion_completa,
+                repite,
                 alumno:alumnos(
                     id,
                     nombre,
@@ -503,6 +505,13 @@ export async function getAlumnosPreceptorAction(params: {
         // Filtro por curso específico (dentro de los permitidos)
         if (params.cursoId && params.cursoId !== 'all') {
             query = query.eq('curso_id', params.cursoId);
+        }
+
+        // Filtro por repitencia
+        if (params.repitente === 'true') {
+            query = query.eq('repite', true);
+        } else if (params.repitente === 'false') {
+            query = query.eq('repite', false);
         }
 
         // Filtro por documentación
