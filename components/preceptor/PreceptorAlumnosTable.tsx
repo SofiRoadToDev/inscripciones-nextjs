@@ -45,6 +45,9 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { PreceptorAlumnosFilters } from './PreceptorAlumnosFilters';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
+import { Download } from 'lucide-react';
 
 export function PreceptorAlumnosTable({ alumnos, cursos, total, currentPage, pageSize }: PreceptorAlumnosTableProps) {
     const router = useRouter();
@@ -104,9 +107,68 @@ export function PreceptorAlumnosTable({ alumnos, cursos, total, currentPage, pag
         }
     };
 
+    const handleExportExcel = async () => {
+        try {
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Alumnos');
+
+            // Definir columnas
+            worksheet.columns = [
+                { header: 'Apellido', key: 'apellido', width: 20 },
+                { header: 'Nombre', key: 'nombre', width: 20 },
+                { header: 'DNI', key: 'dni', width: 15 },
+                { header: 'Curso', key: 'cursoNombre', width: 15 },
+                { header: 'Seguro', key: 'seguro', width: 15 },
+                { header: 'CUD', key: 'tieneCud', width: 10 },
+                { header: 'Documentación', key: 'doc', width: 20 },
+            ];
+
+            // Agregar datos
+            alumnos.forEach(alumno => {
+                worksheet.addRow({
+                    apellido: alumno.apellido,
+                    nombre: alumno.nombre,
+                    dni: alumno.dni,
+                    cursoNombre: alumno.cursoNombre,
+                    seguro: alumno.tieneSeguro ? 'Pagado' : 'Pendiente',
+                    tieneCud: alumno.tieneCud ? 'Si' : 'No',
+                    doc: alumno.documentacionCompleta ? 'Completa' : 'Incompleta',
+                });
+            });
+
+            // Estilo para el encabezado
+            worksheet.getRow(1).font = { bold: true };
+            worksheet.getRow(1).fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFE0E0E0' }
+            };
+
+            const buffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            saveAs(blob, `Alumnos_Filtrados_${new Date().toLocaleDateString()}.xlsx`);
+            toast.success("Excel generado correctamente");
+        } catch (error) {
+            console.error("Error exportando excel:", error);
+            toast.error("Error al exportar a Excel");
+        }
+    };
+
     return (
         <div className="space-y-4">
-            <PreceptorAlumnosFilters cursos={cursos} />
+            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
+                <div className="flex-1 w-full">
+                    <PreceptorAlumnosFilters cursos={cursos} />
+                </div>
+                <Button
+                    onClick={handleExportExcel}
+                    variant="outline"
+                    className="w-full xl:w-auto border-green-600 text-green-700 hover:bg-green-50 gap-2 font-semibold shrink-0"
+                >
+                    <Download className="w-4 h-4" />
+                    Exportar a Excel
+                </Button>
+            </div>
 
 
             {/* Table */}
