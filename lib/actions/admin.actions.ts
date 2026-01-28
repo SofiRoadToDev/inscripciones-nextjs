@@ -34,16 +34,30 @@ export async function getInscripcionesAdmin(params: {
     }
 
     if (params.search) {
-        const isNumeric = !isNaN(Number(params.search)) && params.search.trim() !== '';
+        // We use a simpler approach: filter the nested alumno record.
+        // For PostgREST to filter by related table while still returning all rows that match, 
+        // we can use the 'foreignTable' option in 'or'.
+        // However, if we want to filter the MAIN list based on alumno fields, 
+        // we should ensure we are using !inner if we want to include ONLY those that match.
 
-        if (isNumeric) {
-            // Search in alumno fields OR in pagos for the receipt number
-            // Note: prefixes MUST match the aliases used in the .select()
-            query = query.or(`alumno.dni.ilike.%${params.search}%,alumno.nombre.ilike.%${params.search}%,alumno.apellido.ilike.%${params.search}%,pagos.nro_recibo.eq.${params.search}`);
-        } else {
-            // Search only in alumno fields
-            query = query.or(`alumno.dni.ilike.%${params.search}%,alumno.nombre.ilike.%${params.search}%,alumno.apellido.ilike.%${params.search}%`);
+        // Let's use !inner to force the join to be an inner join for filtering
+        query = supabase
+            .from('inscripciones')
+            .select(`
+                *,
+                alumno:alumnos!inner(id, nombre, apellido, dni),
+                curso:cursos(id, nombre),
+                nivel:niveles(codigo, nivel),
+                ficha_salud:fichas_salud(id, discapacidad, cud)
+            `, { count: 'exact' })
+            .eq('ciclo_lectivo', cicloLectivo);
+
+        if (params.estado && params.estado !== 'todos') {
+            query = query.eq('estado', params.estado);
         }
+
+        const searchTerm = `%${params.search}%`;
+        query = query.or(`nombre.ilike.${searchTerm},apellido.ilike.${searchTerm},dni.ilike.${searchTerm}`, { foreignTable: 'alumnos' });
     }
 
     const { data, count, error } = await query

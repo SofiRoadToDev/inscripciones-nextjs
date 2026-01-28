@@ -14,8 +14,10 @@ import {
     Calendar,
     AlertTriangle,
     ChevronLeft,
-    CheckCircle2
+    CheckCircle2,
+    List
 } from 'lucide-react'
+import Link from 'next/link'
 import {
     Form,
     FormControl,
@@ -168,8 +170,9 @@ export default function InscripcionForm({ onSubmit, onBack, isSubmitting = false
                                             <FormLabel>Nivel Educativo</FormLabel>
                                         </div>
                                         <Select
+                                            key={`nivel-${field.value}`}
                                             onValueChange={field.onChange}
-                                            value={field.value}
+                                            value={field.value || ""}
                                         >
                                             <FormControl>
                                                 <SelectTrigger className="bg-white">
@@ -278,16 +281,30 @@ export default function InscripcionForm({ onSubmit, onBack, isSubmitting = false
                 )}
 
                 <div className="flex justify-between pt-8">
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={onBack}
-                        disabled={isSubmitting}
-                        className="text-neutral-600 hover:text-neutral-900 gap-2"
-                    >
-                        <ChevronLeft className="w-4 h-4" />
-                        Anterior
-                    </Button>
+                    <div className="flex gap-4">
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={onBack}
+                            disabled={isSubmitting}
+                            className="text-neutral-600 hover:text-neutral-900 gap-2"
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                            Anterior
+                        </Button>
+
+                        {mode === 'edit' && (
+                            <Button
+                                asChild
+                                className="bg-orange-500 hover:bg-orange-600 text-white gap-2 shadow-lg shadow-orange-100"
+                            >
+                                <Link href="/admin">
+                                    <List className="w-4 h-4" />
+                                    Panel Admin
+                                </Link>
+                            </Button>
+                        )}
+                    </div>
                     <Button
                         type="submit"
                         disabled={isSubmitting}

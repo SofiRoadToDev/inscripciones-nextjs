@@ -82,11 +82,15 @@ export default function AlumnoForm({ onNext, mode = 'create' }: AlumnoFormProps)
                 ...savedData,
                 email: savedData.email || '',
                 telefono: savedData.telefono || '',
+                genero: savedData.genero || 'Masculino',
                 domicilio: {
                     ...savedData.domicilio,
                     piso_depto: savedData.domicilio?.piso_depto || '',
                     casa_lote: savedData.domicilio?.casa_lote || '',
                     barrio_manzana_block: savedData.domicilio?.barrio_manzana_block || '',
+                    provincia_id: savedData.domicilio?.provincia_id?.toString() || '',
+                    departamento_id: savedData.domicilio?.departamento_id?.toString() || '',
+                    localidad_id: savedData.domicilio?.localidad_id?.toString() || '',
                 }
             })
         }
@@ -285,6 +289,7 @@ export default function AlumnoForm({ onNext, mode = 'create' }: AlumnoFormProps)
                                             <FormLabel>Fecha de Nacimiento</FormLabel>
                                             <FormControl>
                                                 <DateSelector
+                                                    key={field.value}
                                                     value={field.value}
                                                     onChange={field.onChange}
                                                 />
@@ -312,7 +317,7 @@ export default function AlumnoForm({ onNext, mode = 'create' }: AlumnoFormProps)
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Género</FormLabel>
-                                            <Select onValueChange={field.onChange} value={field.value || "Masculino"}>
+                                            <Select key={`genero-${field.value}`} onValueChange={field.onChange} value={field.value || ""}>
                                                 <FormControl>
                                                     <SelectTrigger>
                                                         <SelectValue placeholder="Seleccione" />
@@ -449,12 +454,13 @@ export default function AlumnoForm({ onNext, mode = 'create' }: AlumnoFormProps)
                                         <FormItem>
                                             <FormLabel>Provincia</FormLabel>
                                             <Select
+                                                key={`prov-alumno-${field.value}`}
                                                 onValueChange={(value) => {
                                                     field.onChange(value)
                                                     setValue('domicilio.departamento_id', '')
                                                     setValue('domicilio.localidad_id', '')
                                                 }}
-                                                value={field.value}
+                                                value={field.value || ""}
                                             >
                                                 <FormControl>
                                                     <SelectTrigger>
@@ -480,11 +486,12 @@ export default function AlumnoForm({ onNext, mode = 'create' }: AlumnoFormProps)
                                         <FormItem>
                                             <FormLabel>Departamento</FormLabel>
                                             <Select
+                                                key={`depto-alumno-${field.value}`}
                                                 onValueChange={(value) => {
                                                     field.onChange(value)
                                                     setValue('domicilio.localidad_id', '')
                                                 }}
-                                                value={field.value}
+                                                value={field.value || ""}
                                                 disabled={!selectedProvinciaId || loadingDepartamentos}
                                             >
                                                 <FormControl>
@@ -514,8 +521,9 @@ export default function AlumnoForm({ onNext, mode = 'create' }: AlumnoFormProps)
                                         <FormItem>
                                             <FormLabel>Localidad</FormLabel>
                                             <Select
+                                                key={`loc-alumno-${field.value}`}
                                                 onValueChange={field.onChange}
-                                                value={field.value}
+                                                value={field.value || ""}
                                                 disabled={!selectedDepartamentoId || loadingLocalidades}
                                             >
                                                 <FormControl>

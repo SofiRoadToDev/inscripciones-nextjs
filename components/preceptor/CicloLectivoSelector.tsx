@@ -9,11 +9,17 @@ import {
 } from '@/components/ui/select';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Calendar } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export function CicloLectivoSelector({ defaultValue }: { defaultValue: string }) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const years = [
         (new Date().getFullYear() + 1).toString(),
@@ -29,6 +35,8 @@ export function CicloLectivoSelector({ defaultValue }: { defaultValue: string })
         params.set('ciclo', value);
         router.push(`${pathname}?${params.toString()}`);
     };
+
+    if (!mounted) return null;
 
     return (
         <div className="flex items-center gap-2">

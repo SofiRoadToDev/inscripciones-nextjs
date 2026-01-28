@@ -16,8 +16,8 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
+import InscripcionesFilter from './InscripcionesFilter';
 import {
     getInscripcionesAdmin,
     updateInscripcionStatus,
@@ -157,30 +157,15 @@ export default function InscripcionesTable() {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
-                <div className="relative w-full sm:max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-400 w-4 h-4" />
-                    <Input
-                        placeholder="Buscar por DNI, Nombre o Apellido..."
-                        className="pl-10 border-primary-100 focus-visible:ring-primary-500"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                </div>
-
-                <div className="flex gap-2 w-full sm:w-auto">
-                    <select
-                        className="bg-white border border-primary-100 rounded-lg px-4 py-2 text-sm text-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        value={estado}
-                        onChange={(e) => setEstado(e.target.value)}
-                    >
-                        <option value="todos">Todos los estados</option>
-                        <option value="pendiente">Pendientes</option>
-                        <option value="aprobada">Aprobadas</option>
-                        <option value="rechazada">Rechazadas</option>
-                    </select>
-                </div>
-            </div>
+            <InscripcionesFilter
+                onFilterChange={({ search, estado }) => {
+                    setSearch(search);
+                    setEstado(estado);
+                    setPage(1); // Reset to first page on filter change
+                }}
+                initialSearch={search}
+                initialEstado={estado}
+            />
 
             <div className="bg-white border border-primary-100 rounded-2xl overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">

@@ -383,62 +383,62 @@ export class InscripcionesService {
                 apellido: inscripcion.alumno.apellido,
                 nombre: inscripcion.alumno.nombre,
                 dni: inscripcion.alumno.dni,
-                fecha_nacimiento: this._formatFechaParaForm(inscripcion.alumno.fecha_nacimiento),
+                fecha_nacimiento: inscripcion.alumno.fecha_nacimiento, // Mantener YYYY-MM-DD para DateSelector
                 nacionalidad: inscripcion.alumno.nacionalidad,
                 genero: inscripcion.alumno.genero,
-                email: inscripcion.alumno.email,
-                telefono: inscripcion.alumno.telefono,
+                email: inscripcion.alumno.email || '',
+                telefono: inscripcion.alumno.telefono || '',
                 domicilio: {
                     calle: inscripcion.domicilio?.calle,
                     numero: inscripcion.domicilio?.numero,
-                    piso_depto: inscripcion.domicilio?.piso_depto,
-                    casa_lote: inscripcion.domicilio?.casa_lote,
-                    barrio_manzana_block: inscripcion.domicilio?.barrio_manzana_block,
-                    provincia_id: inscripcion.domicilio?.provincia_id,
-                    departamento_id: inscripcion.domicilio?.departamento_id,
-                    localidad_id: inscripcion.domicilio?.localidad_id
+                    piso_depto: inscripcion.domicilio?.piso_depto || '',
+                    casa_lote: inscripcion.domicilio?.casa_lote || '',
+                    barrio_manzana_block: inscripcion.domicilio?.barrio_manzana_block || '',
+                    provincia_id: inscripcion.domicilio?.provincia_id?.toString() || '',
+                    departamento_id: inscripcion.domicilio?.departamento_id?.toString() || '',
+                    localidad_id: inscripcion.domicilio?.localidad_id?.toString() || ''
                 }
             },
             tutores: {
-                tutores: inscripcion.inscripciones_tutores.map(it => ({
+                tutores: (inscripcion.inscripciones_tutores || []).map(it => ({
                     apellido: it.tutor.apellido,
                     nombre: it.tutor.nombre,
                     dni: it.tutor.dni,
                     vinculo: it.vinculo,
                     telefono: it.tutor.telefono,
-                    estudios: it.tutor.estudios,
-                    ocupacion: it.tutor.ocupacion,
+                    estudios: it.tutor.estudios || '',
+                    ocupacion: it.tutor.ocupacion || '',
                     mismo_domicilio_alumno: it.tutor.domicilio_id === inscripcion.domicilio?.id,
                     domicilio: {
                         calle: it.tutor.domicilio?.calle,
                         numero: it.tutor.domicilio?.numero,
-                        piso_depto: it.tutor.domicilio?.piso_depto,
-                        casa_lote: it.tutor.domicilio?.casa_lote,
-                        barrio_manzana_block: it.tutor.domicilio?.barrio_manzana_block,
-                        provincia_id: it.tutor.domicilio?.provincia_id,
-                        departamento_id: it.tutor.domicilio?.departamento_id,
-                        localidad_id: it.tutor.domicilio?.localidad_id
+                        piso_depto: it.tutor.domicilio?.piso_depto || '',
+                        casa_lote: it.tutor.domicilio?.casa_lote || '',
+                        barrio_manzana_block: it.tutor.domicilio?.barrio_manzana_block || '',
+                        provincia_id: it.tutor.domicilio?.provincia_id?.toString() || '',
+                        departamento_id: it.tutor.domicilio?.departamento_id?.toString() || '',
+                        localidad_id: it.tutor.domicilio?.localidad_id?.toString() || ''
                     }
                 }))
             },
             fichaSalud: {
-                enfermedad_cronica: inscripcion.ficha_salud.enfermedad_cronica,
-                alergias: inscripcion.ficha_salud.alergias,
-                discapacidad: inscripcion.ficha_salud.discapacidad,
-                medicamentos: inscripcion.ficha_salud.medicamentos,
-                vacunacion_completa: inscripcion.ficha_salud.vacunacion_completa,
-                certificado_salud: inscripcion.ficha_salud.certificado_salud,
-                cud: (inscripcion.ficha_salud as any).cud || false,
-                observaciones: inscripcion.ficha_salud.observaciones
+                enfermedad_cronica: inscripcion.ficha_salud.enfermedad_cronica || '',
+                alergias: inscripcion.ficha_salud.alergias || '',
+                discapacidad: inscripcion.ficha_salud.discapacidad || '',
+                medicamentos: inscripcion.ficha_salud.medicamentos || '',
+                vacunacion_completa: !!inscripcion.ficha_salud.vacunacion_completa,
+                certificado_salud: !!inscripcion.ficha_salud.certificado_salud,
+                cud: !!(inscripcion.ficha_salud as any).cud,
+                observaciones: inscripcion.ficha_salud.observaciones || ''
             },
             inscripcion: {
                 ciclo_lectivo: inscripcion.ciclo_lectivo,
-                nivel_codigo: inscripcion.nivel_codigo,
-                repite: inscripcion.repite,
-                materias_pendientes: inscripcion.materias_pendientes,
-                escuela_procedencia: inscripcion.escuela_procedencia,
-                documentacion_completa: inscripcion.documentacion_completa,
-                observaciones: inscripcion.observaciones
+                nivel_codigo: inscripcion.nivel_codigo?.toString() || '',
+                repite: !!inscripcion.repite,
+                materias_pendientes: inscripcion.materias_pendientes || '',
+                escuela_procedencia: inscripcion.escuela_procedencia || '',
+                documentacion_completa: !!inscripcion.documentacion_completa,
+                observaciones: inscripcion.observaciones || ''
             }
         };
     }

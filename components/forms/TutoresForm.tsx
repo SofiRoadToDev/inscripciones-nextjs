@@ -78,7 +78,21 @@ export default function TutoresForm({ onNext, onBack, mode = 'create' }: Tutores
     useEffect(() => {
         const savedData = formStorageService.getTabData('tutores')
         if (savedData && savedData.tutores && savedData.tutores.length > 0) {
-            reset(savedData)
+            const normalizedData = {
+                ...savedData,
+                tutores: savedData.tutores.map((t: any) => ({
+                    ...t,
+                    vinculo: t.vinculo || '',
+                    estudios: t.estudios || '',
+                    domicilio: t.domicilio ? {
+                        ...t.domicilio,
+                        provincia_id: t.domicilio.provincia_id?.toString() || '',
+                        departamento_id: t.domicilio.departamento_id?.toString() || '',
+                        localidad_id: t.domicilio.localidad_id?.toString() || ''
+                    } : undefined
+                }))
+            }
+            reset(normalizedData)
         }
     }, [reset])
 
@@ -272,7 +286,7 @@ function TutorCard({ index, remove, form, provincias }: {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Vínculo</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value || ''}>
+                                    <Select key={field.value} onValueChange={field.onChange} value={field.value || ''}>
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Seleccione" />
@@ -321,8 +335,7 @@ function TutorCard({ index, remove, form, provincias }: {
                             name={`tutores.${index}.estudios`}
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Nivel de Estudios</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value || ''}>
+                                    <Select key={`tutor-${index}-estudios-${field.value}`} onValueChange={field.onChange} value={field.value || ''}>
                                         <FormControl>
                                             <SelectTrigger>
                                                 <div className="flex items-center gap-2">
@@ -443,6 +456,7 @@ function TutorCard({ index, remove, form, provincias }: {
                                         <FormItem>
                                             <FormLabel>Provincia</FormLabel>
                                             <Select
+                                                key={`tutor-${index}-prov-${field.value}`}
                                                 onValueChange={(val) => {
                                                     field.onChange(val)
                                                     form.setValue(`tutores.${index}.domicilio.departamento_id`, '')
@@ -472,6 +486,7 @@ function TutorCard({ index, remove, form, provincias }: {
                                         <FormItem>
                                             <FormLabel>Departamento</FormLabel>
                                             <Select
+                                                key={`tutor-${index}-depto-${field.value}`}
                                                 onValueChange={(val) => {
                                                     field.onChange(val)
                                                     form.setValue(`tutores.${index}.domicilio.localidad_id`, '')
@@ -501,6 +516,7 @@ function TutorCard({ index, remove, form, provincias }: {
                                         <FormItem>
                                             <FormLabel>Localidad</FormLabel>
                                             <Select
+                                                key={`tutor-${index}-loc-${field.value}`}
                                                 onValueChange={field.onChange}
                                                 value={field.value || ''}
                                                 disabled={!selectedDepartamentoId || loadingLocs}

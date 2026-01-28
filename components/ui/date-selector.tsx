@@ -67,7 +67,13 @@ export function DateSelector({
     // Sincronizar si el valor externo cambia (ej: por búsqueda de DNI)
     React.useEffect(() => {
         if (value) {
-            const date = new Date(value + 'T12:00:00')
+            let date = new Date(value + 'T12:00:00')
+            // Fallback for DD/MM/YYYY just in case
+            if (isNaN(date.getTime()) && value.includes('/')) {
+                const [d, m, y] = value.split('/')
+                date = new Date(`${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}T12:00:00`)
+            }
+
             if (!isNaN(date.getTime())) {
                 setDay(date.getDate().toString())
                 setMonth((date.getMonth() + 1).toString())
@@ -85,7 +91,7 @@ export function DateSelector({
             {label && <Label className="text-sm font-medium text-neutral-700">{label}</Label>}
             <div className="grid grid-cols-3 gap-2">
                 {/* Día */}
-                <Select value={day || undefined} onValueChange={setDay}>
+                <Select key={`day-${day}`} value={day || undefined} onValueChange={setDay}>
                     <SelectTrigger className="bg-white">
                         <SelectValue placeholder="Día" />
                     </SelectTrigger>
@@ -97,7 +103,7 @@ export function DateSelector({
                 </Select>
 
                 {/* Mes */}
-                <Select value={month || undefined} onValueChange={setMonth}>
+                <Select key={`month-${month}`} value={month || undefined} onValueChange={setMonth}>
                     <SelectTrigger className="bg-white">
                         <SelectValue placeholder="Mes" />
                     </SelectTrigger>
@@ -109,7 +115,7 @@ export function DateSelector({
                 </Select>
 
                 {/* Año */}
-                <Select value={year || undefined} onValueChange={setYear}>
+                <Select key={`year-${year}`} value={year || undefined} onValueChange={setYear}>
                     <SelectTrigger className="bg-white">
                         <SelectValue placeholder="Año" />
                     </SelectTrigger>
