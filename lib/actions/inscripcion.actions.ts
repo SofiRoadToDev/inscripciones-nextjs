@@ -23,6 +23,42 @@ export async function registrarInscripcionAction(allFormData: FormData) {
 }
 
 /**
+ * Acción para actualizar una inscripción existente
+ */
+export async function actualizarInscripcionAction(id: string, allFormData: FormData) {
+    try {
+        const result = await inscripcionesService.updateFullInscripcion(id, allFormData);
+
+        if (!result.success) {
+            return { success: false, error: result.error };
+        }
+
+        return { success: true };
+    } catch (error: any) {
+        console.error('Error in actualizarInscripcionAction:', error);
+        return { success: false, error: "Error interno del servidor al actualizar la inscripción." };
+    }
+}
+
+/**
+ * Obtiene una inscripción y la mapea al formato de formulario
+ */
+export async function getInscripcionParaEditarAction(id: string) {
+    try {
+        const inscripcion = await inscripcionesService.getInscripcionById(id);
+        if (!inscripcion) {
+            return { success: false, error: "No se encontró la inscripción." };
+        }
+
+        const formData = inscripcionesService.mapInscripcionToFormData(inscripcion);
+        return { success: true, data: formData };
+    } catch (error: any) {
+        console.error('Error in getInscripcionParaEditarAction:', error);
+        return { success: false, error: "Error al recuperar los datos para editar." };
+    }
+}
+
+/**
  * Verifica si un alumno ya está inscrito en un ciclo lectivo
  */
 export async function verificarInscripcionExistenteAction(dni: string, cicloLectivo: string) {

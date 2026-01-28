@@ -33,9 +33,10 @@ import { Badge } from "@/components/ui/badge"
 interface TutoresFormProps {
     onNext: () => void
     onBack: () => void
+    mode?: 'create' | 'edit'
 }
 
-export default function TutoresForm({ onNext, onBack }: TutoresFormProps) {
+export default function TutoresForm({ onNext, onBack, mode = 'create' }: TutoresFormProps) {
     const { provincias } = useProvincias()
 
     const form = useForm<TutoresPageFormData>({

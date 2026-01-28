@@ -38,9 +38,10 @@ interface FichaSaludFormProps {
     onNext: (data: SaludFormData) => void
     onBack: () => void
     isSubmitting?: boolean
+    mode?: 'create' | 'edit'
 }
 
-export default function FichaSaludForm({ onNext, onBack, isSubmitting = false }: FichaSaludFormProps) {
+export default function FichaSaludForm({ onNext, onBack, isSubmitting = false, mode = 'create' }: FichaSaludFormProps) {
     const form = useForm<SaludFormData>({
         resolver: zodResolver(saludSchema),
         defaultValues: {

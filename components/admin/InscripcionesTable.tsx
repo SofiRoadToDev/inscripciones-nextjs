@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
     Search,
     Filter,
@@ -10,7 +11,8 @@ import {
     ChevronRight,
     Trash2,
     AlertCircle,
-    CheckCircle2
+    CheckCircle2,
+    Pencil
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -235,6 +237,14 @@ export default function InscripcionesTable() {
                                         </td>
                                         <td className="px-6 py-5 text-right">
                                             <div className="flex justify-end gap-1">
+                                                <Link
+                                                    href={`/admin/inscripciones/${item.id}/editar`}
+                                                    className="flex flex-col items-center justify-center h-16 w-14 rounded-xl hover:bg-primary-50 text-primary-400 hover:text-primary-600 transition-all gap-1 cursor-pointer"
+                                                >
+                                                    <Pencil className="w-4 h-4 shadow-sm" />
+                                                    <span className="text-[9px] font-black uppercase tracking-tighter">Editar</span>
+                                                </Link>
+
                                                 <button
                                                     onClick={() => handleOpenDetail(item.id)}
                                                     className="flex flex-col items-center justify-center h-16 w-14 rounded-xl hover:bg-primary-50 text-primary-400 hover:text-primary-600 transition-all gap-1 cursor-pointer"

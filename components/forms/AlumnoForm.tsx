@@ -32,9 +32,10 @@ import { Card } from "@/components/ui/card"
 
 interface AlumnoFormProps {
     onNext: () => void
+    mode?: 'create' | 'edit'
 }
 
-export default function AlumnoForm({ onNext }: AlumnoFormProps) {
+export default function AlumnoForm({ onNext, mode = 'create' }: AlumnoFormProps) {
     const { provincias, loading: loadingProvincias, error: errorProvincias } = useProvincias()
 
     const [searchDni, setSearchDni] = useState('')
@@ -139,18 +140,20 @@ export default function AlumnoForm({ onNext }: AlumnoFormProps) {
         setSearchInfo(null)
 
         try {
-            // Obtener el ciclo lectivo actual o el guardado en la tab de inscripción
-            const savedInscripcion = formStorageService.getTabData('inscripcion')
-            const cicloLectivo = savedInscripcion?.ciclo_lectivo || new Date().getFullYear().toString()
+            // Omitir validación de duplicado si estamos editando la propia inscripción
+            if (mode !== 'edit') {
+                const savedInscripcion = formStorageService.getTabData('inscripcion')
+                const cicloLectivo = savedInscripcion?.ciclo_lectivo || new Date().getFullYear().toString()
 
-            const result = await verificarInscripcionExistenteAction(data.dni, cicloLectivo)
+                const result = await verificarInscripcionExistenteAction(data.dni, cicloLectivo)
 
-            if (result.success && result.exists) {
-                setSearchInfo({
-                    type: 'error',
-                    message: `El alumno con DNI ${data.dni} ya posee una inscripción registrada para el ciclo lectivo ${cicloLectivo}.`
-                })
-                return
+                if (result.success && result.exists) {
+                    setSearchInfo({
+                        type: 'error',
+                        message: `El alumno con DNI ${data.dni} ya posee una inscripción registrada para el ciclo lectivo ${cicloLectivo}.`
+                    })
+                    return
+                }
             }
 
             console.log('Alumno data:', data)

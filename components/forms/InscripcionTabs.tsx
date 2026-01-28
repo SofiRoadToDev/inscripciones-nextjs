@@ -7,14 +7,19 @@ import AlumnoForm from './AlumnoForm'
 import TutoresForm from './TutoresForm'
 import FichaSaludForm from './FichaSaludForm'
 import InscripcionForm from './InscripcionForm'
-import { registrarInscripcionAction } from '@/lib/actions/inscripcion.actions'
+import { registrarInscripcionAction, actualizarInscripcionAction } from '@/lib/actions/inscripcion.actions'
 import { formStorageService } from '@/lib/services/form-storage.service'
-import { CheckCircle, AlertCircle, RefreshCw } from 'lucide-react'
+import { CheckCircle, AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 
-export default function InscripcionTabs() {
+interface InscripcionTabsProps {
+    mode?: 'create' | 'edit'
+    inscripcionId?: string
+}
+
+export default function InscripcionTabs({ mode = 'create', inscripcionId }: InscripcionTabsProps) {
     const [activeTab, setActiveTab] = useState('alumno')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -31,7 +36,11 @@ export default function InscripcionTabs() {
     }
 
     const returnToHome = () => {
-        router.push('/')
+        if (mode === 'edit') {
+            router.push('/admin/inscripciones')
+        } else {
+            router.push('/')
+        }
     }
 
     const handleFinalSubmit = async () => {
@@ -40,22 +49,28 @@ export default function InscripcionTabs() {
 
         try {
             const allData = formStorageService.getAllFormData()
-            console.log('📦 Iniciando envío de inscripción con todos los datos:', allData)
 
-            // Validaciones básicas de que todos los tabs tienen datos
+            // Validación básica de pasos completos
             if (!allData.alumno || !allData.tutores || !allData.fichaSalud || !allData.inscripcion) {
-                console.warn('⚠️ Faltan datos en el storage:', allData);
                 throw new Error("Por favor complete todos los pasos del formulario antes de finalizar.")
             }
 
-            const result = await registrarInscripcionAction(allData)
-            console.log('🚀 Resultado del registro:', result)
+            let result;
+            if (mode === 'edit' && inscripcionId) {
+                result = await actualizarInscripcionAction(inscripcionId, allData)
+            } else {
+                result = await registrarInscripcionAction(allData)
+            }
+
+            console.log('🚀 Resultado:', result)
 
             if (result.success) {
                 setSuccess(true)
-                formStorageService.clearFormData()
+                if (mode !== 'edit') {
+                    formStorageService.clearFormData()
+                }
             } else {
-                setError(result.error || "Ocurrió un error inesperado al registrar la inscripción.")
+                setError(result.error || "Ocurrió un error inesperado al procesar la inscripción.")
             }
         } catch (err: any) {
             console.error('❌ Error capturado en handleFinalSubmit:', err)
@@ -72,17 +87,21 @@ export default function InscripcionTabs() {
                     <div className="w-20 h-20 rounded-full bg-accent-100 text-accent-600 flex items-center justify-center mx-auto mb-4">
                         <CheckCircle className="w-10 h-10" />
                     </div>
-                    <h2 className="font-display text-4xl text-primary-900 italic">¡Inscripción Exitosa!</h2>
+                    <h2 className="font-display text-4xl text-primary-900 italic">
+                        {mode === 'edit' ? '¡Cambios Guardados!' : '¡Inscripción Exitosa!'}
+                    </h2>
                     <p className="text-lg text-neutral-600 max-w-md mx-auto">
-                        Los datos han sido registrados correctamente en nuestro sistema. El colegio se pondrá en contacto pronto.
+                        {mode === 'edit'
+                            ? 'La información de la inscripción ha sido actualizada correctamente.'
+                            : 'Los datos han sido registrados correctamente en nuestro sistema. El colegio se pondrá en contacto pronto.'}
                     </p>
                     <div className="pt-8">
                         <Button
                             onClick={returnToHome}
                             className="cursor-pointer bg-primary-500 hover:bg-primary-600 text-white gap-2"
                         >
-                            <RefreshCw className="w-4 h-4" />
-                            Volver a la página principal
+                            {mode === 'edit' ? <ArrowLeft className="w-4 h-4" /> : <RefreshCw className="w-4 h-4" />}
+                            {mode === 'edit' ? 'Volver al Panel' : 'Volver a la página principal'}
                         </Button>
                     </div>
                 </Card>
@@ -91,48 +110,40 @@ export default function InscripcionTabs() {
     }
 
     return (
-        <div className="w-full max-w-4xl mx-auto py-18">
-            <div className="mb-12">
-                <h1 className="font-display text-display text-primary-900 text-4xl mb-4">
-                    Formulario de Preinscripción
-                </h1>
-                <p className="text-lg text-neutral-800">
-                    Siga los pasos para formalizar la inscripción del ciclo lectivo {new Date().getFullYear()}
-                </p>
-            </div>
-
+        <div className="w-full max-w-5xl mx-auto py-8">
             {error && (
-                <Alert variant="destructive" className="mb-8 animate-in slide-in-from-top-2">
+                <Alert variant="destructive" className="mb-6 animate-in slide-in-from-top-2 border-2">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Error</AlertTitle>
+                    <AlertTitle>Error en el proceso</AlertTitle>
                     <AlertDescription>{error}</AlertDescription>
                 </Alert>
             )}
 
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-4 mb-8">
-                    <TabsTrigger value="alumno" className="font-sans">
+            <Tabs value={activeTab} className="space-y-6">
+                <TabsList className="grid grid-cols-4 w-full h-auto p-1 bg-neutral-100 rounded-xl">
+                    <TabsTrigger value="alumno" disabled={activeTab !== 'alumno'} className="py-3 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
                         1. Alumno
                     </TabsTrigger>
-                    <TabsTrigger value="tutores" className="font-sans">
+                    <TabsTrigger value="tutores" disabled={activeTab !== 'tutores'} className="py-3 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
                         2. Tutores
                     </TabsTrigger>
-                    <TabsTrigger value="salud" className="font-sans">
+                    <TabsTrigger value="salud" disabled={activeTab !== 'salud'} className="py-3 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
                         3. Salud
                     </TabsTrigger>
-                    <TabsTrigger value="inscripcion" className="font-sans">
-                        4. Inscripción
+                    <TabsTrigger value="inscripcion" disabled={activeTab !== 'inscripcion'} className="py-3 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                        4. Finalizar
                     </TabsTrigger>
                 </TabsList>
 
                 <Card className="p-8">
                     <div key={resetKey}>
                         <TabsContent value="alumno" className="mt-0">
-                            <AlumnoForm onNext={() => setActiveTab('tutores')} />
+                            <AlumnoForm mode={mode} onNext={() => setActiveTab('tutores')} />
                         </TabsContent>
 
                         <TabsContent value="tutores" className="mt-0">
                             <TutoresForm
+                                mode={mode}
                                 onNext={() => setActiveTab('salud')}
                                 onBack={() => setActiveTab('alumno')}
                             />
@@ -140,6 +151,7 @@ export default function InscripcionTabs() {
 
                         <TabsContent value="salud" className="mt-0">
                             <FichaSaludForm
+                                mode={mode}
                                 onNext={() => setActiveTab('inscripcion')}
                                 onBack={() => setActiveTab('tutores')}
                             />
@@ -147,6 +159,7 @@ export default function InscripcionTabs() {
 
                         <TabsContent value="inscripcion" className="mt-0">
                             <InscripcionForm
+                                mode={mode}
                                 onSubmit={handleFinalSubmit}
                                 onBack={() => setActiveTab('salud')}
                                 isSubmitting={isSubmitting}

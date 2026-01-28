@@ -43,9 +43,10 @@ interface InscripcionFormProps {
     onSubmit: (data: InscripcionFormData) => void
     onBack: () => void
     isSubmitting?: boolean
+    mode?: 'create' | 'edit'
 }
 
-export default function InscripcionForm({ onSubmit, onBack, isSubmitting = false }: InscripcionFormProps) {
+export default function InscripcionForm({ onSubmit, onBack, isSubmitting = false, mode = 'create' }: InscripcionFormProps) {
     const currentYear = new Date().getFullYear().toString()
     const [localError, setLocalError] = useState<string | null>(null)
 
@@ -101,11 +102,13 @@ export default function InscripcionForm({ onSubmit, onBack, isSubmitting = false
             }
 
             // Ultima verificación de duplicado (por si cambió el ciclo aquí)
-            const check = await verificarInscripcionExistenteAction(savedAlumno.dni, data.ciclo_lectivo)
+            if (mode !== 'edit') {
+                const check = await verificarInscripcionExistenteAction(savedAlumno.dni, data.ciclo_lectivo)
 
-            if (check.success && check.exists) {
-                setLocalError(`El alumno ya posee una inscripción registrada para el ciclo ${data.ciclo_lectivo}.`)
-                return
+                if (check.success && check.exists) {
+                    setLocalError(`El alumno ya posee una inscripción registrada para el ciclo ${data.ciclo_lectivo}.`)
+                    return
+                }
             }
 
             onSubmit(data)
@@ -294,7 +297,7 @@ export default function InscripcionForm({ onSubmit, onBack, isSubmitting = false
                             "Procesando..."
                         ) : (
                             <>
-                                Finalizar y Registrar Inscripción
+                                {mode === 'edit' ? 'Guardar Cambios' : 'Finalizar y Registrar Inscripción'}
                                 <CheckCircle2 className="w-4 h-4" />
                             </>
                         )}
